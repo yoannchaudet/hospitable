@@ -1,6 +1,8 @@
 <!-- PROJECT LOGO
      https://www.patorjk.com/software/taag/#p=display&f=Standard&t=hospitable
 -->
+<!-- markdownlint-disable MD040 -->
+<!-- markdownlint-disable MD041 -->
 ```
  _                     _ _        _     _
 | |__   ___  ___ _ __ (_) |_ __ _| |__ | | ___
@@ -15,53 +17,60 @@
 - [Table of Contents](#table-of-contents)
 - [About The Project](#about-the-project)
 - [Built With](#built-with)
+- [Getting Started](#getting-started)
+- [Usage and Examples](#usage-and-examples)
+  - [Text Formatting](#text-formatting)
 - [License](#license)
 - [Attributions](#attributions)
 - [Contact](#contact)
 
 ## About The Project
 
-A good host is said to be *hospitable*, as such this project contains a set of PowerShell [cmdlets](https://docs.microsoft.com/en-us/powershell/scripting/developer/cmdlet/cmdlet-overview?view=powershell-7.1) (in the form of [advanced functions](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_functions_advanced?view=powershell-7.1)) for printing stuff on terminal/console.
+A good host is said to be *hospitable*, as such this project contains a set of PowerShell [cmdlets][cmdlets] (in the form of [advanced functions][advanced-functions]) for printing stuff on terminal/console.
 
-⚠️ This project makes use of [virtual terminal sequences (based on VT-100)](https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences) and as such may not work on older versions of Windows. Everywhere else (including Linux and MacOS), it should render just fine.
+This project supports PowerShell 7+ and is compatible with Windows 10+, with MacOS and Linux. Because most pretty outputs rely on [virtual terminal sequences (based on VT-100)][vt-100], older versions of Windows are not supported.
 
 ## Built With
 
-* [PowerShell](https://github.com/PowerShell/PowerShell), a great (and now interoperable!) scripting language
+- [PowerShell][powershell], a great (and now interoperable!) scripting language
+- [Pester][pester], a test framework for PowerShell
 
-<!-- GETTING STARTED
 ## Getting Started
 
-To get a local copy up and running follow these simple steps.
+To run locally follow these steps:
 
-### Prerequisites
+- Install [PowerShell][powershell]
 
-This is an example of how to list things you need to use the software and how to install them.
-* npm
-```sh
-npm install npm@latest -g
+- Then run the following commands from the root of this repository:
+
+   ```ps
+   # Install build dependencies
+   ./install-build-dependencies.ps1
+
+   # Run tests
+   ./build.ps1 Test
+
+   # Import the local module in the current shell (so cmdlets can be called)
+   ./build.ps1 Import
+   ```
+
+## Usage and Examples
+
+### Text Formatting
+
+The three following formatting are supported:
+
+```ps
+# Bold, underline and negative formats
+Get-Bold bold
+Get-Underline underline
+Get-Negative negative
+
+# They can be combined too in pipes
+'hello there' | Get-Bold | Get-Underline
 ```
 
-### Installation
-
-1. Clone the repo
-```sh
-git clone https://github.com/github_username/repo.git
-```
-2. Install NPM packages
-```sh
-npm install
-```
--->
-
-<!-- USAGE EXAMPLES
-## Usage
-
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
-
-_For more examples, please refer to the [Documentation](https://example.com)_
-
--->
+![text formatting](./images/text-formatting.png)
 
 ## License
 
@@ -69,7 +78,7 @@ Distributed under the MIT License. See [`LICENSE`](./LICENSE) for more informati
 
 ## Attributions
 
-- www.patorjk.com for the sweet logo
+- www.patorjk.com for the sweet ASCII logo
 
 <!-- CONTACT -->
 ## Contact
@@ -86,19 +95,8 @@ Project link: https://github.com/yoannchaudet/hospitable.
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/othneildrew/Best-README-Template.svg?style=flat-square
-[contributors-url]: https://github.com/othneildrew/Best-README-Template/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/othneildrew/Best-README-Template.svg?style=flat-square
-[forks-url]: https://github.com/othneildrew/Best-README-Template/network/members
-[stars-shield]: https://img.shields.io/github/stars/othneildrew/Best-README-Template.svg?style=flat-square
-[stars-url]: https://github.com/othneildrew/Best-README-Template/stargazers
-[issues-shield]: https://img.shields.io/github/issues/othneildrew/Best-README-Template.svg?style=flat-square
-[issues-url]: https://github.com/othneildrew/Best-README-Template/issues
-[license-shield]: https://img.shields.io/github/license/othneildrew/Best-README-Template.svg?style=flat-square
-[license-url]: https://github.com/othneildrew/Best-README-Template/blob/master/LICENSE.txt
-[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=flat-square&logo=linkedin&colorB=555
-[linkedin-url]: https://linkedin.com/in/othneildrew
-[product-screenshot]: images/screenshot.png
-[inkscape]: https://inkscape.org
-[font]: https://fonts.google.com/specimen/Nanum+Pen+Script?preview.text=souvenirs&preview.text_type=custom&category=Handwriting&sort=popularity#standard-styles
-[font-license]: https://scripts.sil.org/cms/scripts/page.php?site_id=nrsi&id=OFL
+[advanced-functions]:https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_functions_advanced?view=powershell-7.1
+[cmdlets]:https://docs.microsoft.com/en-us/powershell/scripting/developer/cmdlet/cmdlet-overview?view=powershell-7.1
+[pester]: https://pester.dev/
+[powershell]: https://github.com/PowerShell/PowerShell
+[vt-100]: https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences

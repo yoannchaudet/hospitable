@@ -11,6 +11,9 @@
 
   .PARAMETER PostModifier
   The modifier to apply after the value.
+
+  .PARAMETER Esc
+  The escape sequence.
   #>
 
   param (
