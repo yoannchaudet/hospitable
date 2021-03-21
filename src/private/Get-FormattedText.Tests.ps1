@@ -11,8 +11,8 @@ InModuleScope Hospitable {
     }
 
     It 'Formats text' {
-      Get-FormattedText -Value 'value' -PreModifier 'pre' -PostModifier 'post' | Should -Be 'prevaluepost'
-      Get-FormattedText -Value "value`nvalue" -PreModifier 'pre' -PostModifier 'post' | Should -Be "prevalue`nvaluepost"
+      Get-FormattedText -Value 'value' -PreModifier 'pre' -PostModifier 'post' -Esc '!' | Should -Be '!prevalue!post'
+      Get-FormattedText -Value "value`nvalue" -PreModifier 'pre' -PostModifier 'post' -Esc '!' | Should -Be "!prevalue`nvalue!post"
     }
   }
 

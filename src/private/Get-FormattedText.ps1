@@ -18,11 +18,12 @@
     [Parameter(Mandatory)]
     [string] $PreModifier,
     [Parameter(Mandatory)]
-    [string] $PostModifier
+    [string] $PostModifier,
+    [string] $Esc = $script:ESC
   )
 
   if ($Value) {
-    "$($script:ESC)$($PreModifier)$Value$($script:ESC)$($PostModifier)"
+    "$($Esc)$($PreModifier)$Value$($Esc)$($PostModifier)"
   }
 
 }
