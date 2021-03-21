@@ -43,7 +43,7 @@ To run locally follow these steps:
 
 - Then run the following commands from the root of this repository:
 
-   ```ps
+   ```sh
    # Install build dependencies
    ./install-build-dependencies.ps1
 
@@ -60,7 +60,7 @@ To run locally follow these steps:
 
 The three following formatting are supported:
 
-```ps
+```powershell
 # Bold, underline and negative formats
 Get-Bold bold
 Get-Underline underline
