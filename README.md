@@ -2,7 +2,7 @@
      https://www.patorjk.com/software/taag/#p=display&f=Standard&t=hospitable
 -->
 ```
-  _                     _ _        _     _
+ _                     _ _        _     _
 | |__   ___  ___ _ __ (_) |_ __ _| |__ | | ___
 | '_ \ / _ \/ __| '_ \| | __/ _` | '_ \| |/ _ \
 | | | | (_) \__ \ |_) | | || (_| | |_) | |  __/
@@ -21,9 +21,9 @@
 
 ## About The Project
 
-A good host is said to be *hospitable*. There it is, hospitable is a set of PowerShell [cmdlets](https://docs.microsoft.com/en-us/powershell/scripting/developer/cmdlet/cmdlet-overview?view=powershell-7.1) (in the form of [advanced functions](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_functions_advanced?view=powershell-7.1)) for printing stuff on terminal/console.
+A good host is said to be *hospitable*, as such this project contains a set of PowerShell [cmdlets](https://docs.microsoft.com/en-us/powershell/scripting/developer/cmdlet/cmdlet-overview?view=powershell-7.1) (in the form of [advanced functions](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_functions_advanced?view=powershell-7.1)) for printing stuff on terminal/console.
 
-This project makes use of [virtual terminal sequences (based on VT-100)](https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences) and as such may not work on older versions of Windows. Everywhere else (including Linux and MacOS), it should render just fine.
+⚠️ This project makes use of [virtual terminal sequences (based on VT-100)](https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences) and as such may not work on older versions of Windows. Everywhere else (including Linux and MacOS), it should render just fine.
 
 ## Built With
 
