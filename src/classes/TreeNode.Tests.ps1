@@ -26,4 +26,37 @@ InModuleScope Hospitable {
       $node.ColumnsAlignment.ContainsKey(1) | Should -Be $False
     }
   }
+
+  Describe 'TreeNode.ComputeColumnsMaxLengthPerDepth' {
+    It 'Recursively compute the max length per depth (1-column tree)' {
+      # Create a simple tree
+      $node = New-TreeNode
+      $node.AddChild('b').AddChild('cccc') | Out-Null
+
+      # Compute max length per depth
+      $columnsMaxLengthPerDepth = @{}
+      $node.ComputeColumnsMaxLengthPerDepth($columnsMaxLengthPerDepth, 0)
+      $columnsMaxLengthPerDepth.Count | Should -Be 2
+      $columnsMaxLengthPerDepth[0][0] | Should -Be 1
+      $columnsMaxLengthPerDepth[1][0] | Should -Be 4
+    }
+
+    It 'Recursively compute the max length per depth (n-column tree)' {
+      # Create a simple tree
+      $node = New-TreeNode
+      $node.AddChild(@('c1', 'c2', 'c3')).AddChild(@('a', 'aa'))
+      $node.AddChild('a single long column')
+      $node.AddChild(@('c1', 'c', 'ccc'))
+
+      # Compute max length per depth
+      $columnsMaxLengthPerDepth = @{}
+      $node.ComputeColumnsMaxLengthPerDepth($columnsMaxLengthPerDepth, 0)
+      $columnsMaxLengthPerDepth.Count | Should -Be 2
+      $columnsMaxLengthPerDepth[0][0] | Should -Be 'a single long column'.Length
+      $columnsMaxLengthPerDepth[0][1] | Should -Be 2
+      $columnsMaxLengthPerDepth[0][2] | Should -Be 3
+      $columnsMaxLengthPerDepth[1][0] | Should -Be 1
+      $columnsMaxLengthPerDepth[1][1] | Should -Be 2
+    }
+  }
 }

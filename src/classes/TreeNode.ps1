@@ -1,8 +1,8 @@
 ﻿###
 ### Object representing a tree node.
 ###
-### A tree node has a label or a set of columns to display on one line.
-### When columns are used, each of them can have an alignment (left, centered or right).
+### A tree node has a set of columns to display on one line (formatted as a label).
+### Columns can have an alignment (left, centered or right).
 ### Finally, a tree node may have children.
 ###
 
@@ -12,7 +12,7 @@ class TreeNode {
   ###
 
   # Label to display
-  [String] $Label
+  hidden [String] $Label
 
   # Columns (instead of a single label)
   [String[]] $Columns
@@ -33,8 +33,8 @@ class TreeNode {
     $columnsCount = $Columns ? $Columns.Count : 0
 
     # Init properties
-    $this.Label            = $columnsCount -gt 0 ? $Columns[0] : ""
-    $this.Columns          = $columnsCount -le 1 ? @() : $Columns
+    $this.Label            = $columnsCount -eq 1 ? $Columns[0] : ""
+    $this.Columns          = $columnsCount -lt 1 ? @() : $Columns
     $this.ColumnsAlignment = @{}
     $this.Children         = New-Object 'System.Collections.Generic.List[TreeNode]'
   }
@@ -139,5 +139,5 @@ class TreeNode {
     $this.Children | ForEach-Object {
       $_.FormatChildren($SpacesBetweenColumns, $ColumnsMaxLengthPerDepth, $Depth + 1)
     }
-   }
+  }
 }

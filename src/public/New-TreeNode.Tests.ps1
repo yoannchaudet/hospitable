@@ -14,13 +14,13 @@ InModuleScope Hospitable {
     It 'Creates one-column tree node' {
       $node = New-TreeNode 'label'
       $node.Label | Should -Be 'label'
-      $node.Columns.Count | Should -Be 0
+      $node.Columns.Count | Should -Be 1
       $node.Children.Count | Should -Be 0
     }
 
     It 'Creates n-column tree node' {
       $node = New-TreeNode 'col1', 'col2'
-      $node.Label | Should -Be 'col1'
+      $node.Label | Should -Be ''
       $node.Columns.Count | Should -Be 2
       $node.Columns[0] | Should -Be 'col1'
       $node.Columns[1] | Should -Be 'col2'
