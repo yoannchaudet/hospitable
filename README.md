@@ -20,6 +20,7 @@
 - [Getting Started](#getting-started)
 - [Usage and Examples](#usage-and-examples)
   - [Text Formatting](#text-formatting)
+  - [Get-Lists](#get-lists)
 - [License](#license)
 - [Attributions](#attributions)
 - [Contact](#contact)
@@ -70,7 +71,21 @@ Get-Negative negative
 'hello there' | Get-Bold | Get-Underline
 ```
 
-![text formatting](./images/text-formatting.png)
+![text formatting example](./images/text-formatting.png)
+
+### Get-Lists
+
+Format a list of lists.
+
+```powershell
+# A 3-element list including a nested list
+Get-Lists 'item 1', @('sub group item 1', 'sub group item 2'), 'item 3'
+
+# With some formatting
+Get-Lists ('item 1' | Get-Underline), ('item 2' | Get-Underline)
+```
+
+![Get-Lists example](./images/get-lists.png)
 
 ## License
 

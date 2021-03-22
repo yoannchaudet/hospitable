@@ -5,6 +5,9 @@
 
   .PARAMETER Value
   The string to format.
+
+  .OUTPUTS
+  The formatted string (with VT-100 modifiers).
   #>
 
   param (

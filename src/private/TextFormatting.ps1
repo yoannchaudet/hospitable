@@ -1,4 +1,8 @@
-﻿function Get-FormattedText {
+﻿###
+### Text formatting utility functions
+###
+
+function Get-FormattedText {
   <#
   .SYNOPSIS
   Apply VT-100 modifiers to a string in order to apply a formatting.
