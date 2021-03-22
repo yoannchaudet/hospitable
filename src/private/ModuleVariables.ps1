@@ -1,5 +1,5 @@
 ﻿###
-### Module variables (used as constants)
+### Module variables (used as constants) and utilities
 ###
 
 # VT-100 text formatting
