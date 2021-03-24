@@ -33,7 +33,7 @@ class TreeNode {
     $columnsCount = $Columns ? $Columns.Count : 0
 
     # Init properties
-    $this.Label            = $columnsCount -eq 1 ? $Columns[0] : ""
+    $this.Label            = ''
     $this.Columns          = $columnsCount -lt 1 ? @() : $Columns
     $this.ColumnsAlignment = @{}
     $this.Children         = New-Object 'System.Collections.Generic.List[TreeNode]'
@@ -110,8 +110,8 @@ class TreeNode {
 
         # Get column alignment
         $columnAlignment = $null
-        if ($this.ColumnsAlignment -and $this.ColumnsAlignment.ContainsKey($columnIndex)) {
-          $columnAlignment = $this.ColumnsAlignment[$columnIndex]
+        if ($node.ColumnsAlignment -and $node.ColumnsAlignment.ContainsKey($columnIndex)) {
+          $columnAlignment = $node.ColumnsAlignment[$columnIndex]
         }
         if (!($columnAlignment -imatch 'left|right|centered')) {
           $columnAlignment = 'left'
@@ -120,13 +120,13 @@ class TreeNode {
         # Pad the column
         switch ($columnAlignment) {
           'left' {
-            $node.Columns[$columnIndex].PadRight($columnsMaxLength[$columnIndex], ' ')
+            $node.Columns[$columnIndex].Trim().PadRight($columnsMaxLength[$columnIndex], ' ')
           }
           'right' {
-            $node.Columns[$columnIndex].PadLeft($columnsMaxLength[$columnIndex], ' ')
+            $node.Columns[$columnIndex].Trim().PadLeft($columnsMaxLength[$columnIndex], ' ')
           }
           'centered' {
-            $col = $node.Columns[$columnIndex]
+            $col = $node.Columns[$columnIndex].Trim()
             $col = $col.PadRight(($columnsMaxLength[$columnIndex] - $col.Length) / 2 + $col.Length, ' ')
             $col = $col.PadLeft($columnsMaxLength[$columnIndex], ' ')
             $col
