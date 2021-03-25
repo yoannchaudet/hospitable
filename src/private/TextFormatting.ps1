@@ -34,3 +34,33 @@ function Get-FormattedText {
   }
 
 }
+
+function Get-FormattedStringLength {
+  <#
+  .SYNOPSIS
+  Return the length of a string excluding VT-100 text formatting modifiers.
+
+  .PARAMETER FormattedString
+  The formatted string for which to return the length.
+
+  .OUTPUTS
+  The string length.
+  #>
+
+  param (
+    [string] $FormattedString
+  )
+
+  # Handle null input
+  if (-Not $FormattedString) {
+    return 0
+  }
+
+  # Get the length of all text formatting modifiers
+  $modifiersLength = [Regex]::Matches($FormattedString, "$($script:ESC)\[[0-9]+m") | ForEach-Object {
+    $_.Groups[0].Length
+  } | Measure-Object -Sum
+
+  # Return the total length minus the modifiers
+  $FormattedString.Length - $modifiersLength.Sum
+}

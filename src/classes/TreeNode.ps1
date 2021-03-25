@@ -1,9 +1,5 @@
 ﻿###
-### Object representing a tree node.
-###
-### A tree node has a set of columns to display on one line (formatted as a label).
-### Columns can have an alignment (left, centered or right).
-### Finally, a tree node may have children.
+### Everything to represent tree nodes
 ###
 
 enum ColumnAlignment {

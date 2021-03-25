@@ -51,4 +51,25 @@ InModuleScope Hospitable {
       Get-Underline 'underline' | Should -Be "$($script:ESC)$($script:TEXT_UNDERLINE)underline$($script:ESC)$($script:TEXT_NO_UNDERLINE)"
     }
   }
+
+  Describe 'Get-FormattedStringLength' {
+    It 'Supports null and empty strings' {
+      Get-FormattedStringLength | Should -Be 0
+      Get-FormattedStringLength '' | Should -Be 0
+    }
+
+    It 'Supports strings not containing modifiers' {
+      Get-FormattedStringLength 'a' | Should -Be 1
+      Get-FormattedStringLength 'hello' | Should -Be 5
+      Get-FormattedStringLength 'hello 🤠' | Should -Be 'hello 🤠'.Length
+      Get-FormattedStringLength "  `nline 1`nlines 2 " | Should -Be "  `nline 1`nlines 2 ".Length
+    }
+
+    It 'Supports valid text formatting' {
+      Get-FormattedStringLength (Get-Bold 'hello') | Should -Be 5
+      Get-FormattedStringLength ('hello 🤠' | Get-Bold | Get-Underline) | Should -Be 'hello 🤠'.Length
+      Get-FormattedStringLength ("  `nline 1`nlines 2 " | Get-Bold | Get-Underline | Get-Negative) | Should -Be "  `nline 1`nlines 2 ".Length
+      Get-FormattedStringLength @('a', (Get-Bold 'b'), (Get-Negative 'c'), (Get-Underline 'd')) -Join ' ' | Should -Be 7
+    }
+  }
 }
