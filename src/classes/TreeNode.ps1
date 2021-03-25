@@ -6,22 +6,32 @@
 ### Finally, a tree node may have children.
 ###
 
+enum ColumnAlignment {
+  Left
+  Right
+  Centered
+}
+
+class TreeNodeColumn {
+  [String] $Text
+  [int] $TextLength
+  [ColumnAlignment] $Alignment
+}
+
 class TreeNode {
+
   ###
   ### Properties
   ###
 
-  # Label to display
+  # Columns
+  [TreeNodeColumn[]] $Columns
+
+  # Label to display (i.e. columns formatted one a single line)
   hidden [String] $Label
 
-  # Columns (instead of a single label)
-  [String[]] $Columns
-
-  # Columns alignment (index -> 'left|right|centered')
-  hidden [Hashtable] $ColumnsAlignment
-
   # List of children for this node
-  [System.Collections.Generic.List[TreeNode]] $Children
+  hidden [System.Collections.Generic.List[TreeNode]] $Children
 
   ###
   ### Constructor
@@ -29,14 +39,18 @@ class TreeNode {
 
   # Build a new tree node
   TreeNode([String[]] $Columns) {
-    # Get number of columns passed
-    $columnsCount = $Columns ? $Columns.Count : 0
-
     # Init properties
-    $this.Label            = ''
-    $this.Columns          = $columnsCount -lt 1 ? @() : $Columns
-    $this.ColumnsAlignment = @{}
-    $this.Children         = New-Object 'System.Collections.Generic.List[TreeNode]'
+    $columnsCount = $Columns ? $Columns.Count : 0
+    $this.Columns = $columnsCount -lt 1 ? @() : ($Columns | ForEach-Object {
+      $trimmedText = $_.Trim()
+      [TreeNodeColumn] @{
+        Text = $trimmedText
+        TextLength = Get-FormattedStringLength $trimmedText
+        Alignment = [ColumnAlignment]::Left
+      }
+    })
+    $this.Label = ''
+    $this.Children = New-Object 'System.Collections.Generic.List[TreeNode]'
   }
 
   ###
@@ -52,16 +66,10 @@ class TreeNode {
     return $child
   }
 
-  # Set column alignment (left, right, centered) for a given column index (starting at 0)
-  [void] SetColumnAlignment([int] $ColumnIndex, [string] $Alignment) {
-    # If an alignment is provided, set it
-    if ($Alignment) {
-      $this.ColumnsAlignment[$ColumnIndex] = $Alignment
-    }
-
-    # Or clear it
-    else {
-      $this.ColumnsAlignment.Remove($ColumnIndex)
+  # Set column alignment for a given column
+  [void] SetColumnAlignment([int] $ColumnIndex, [ColumnAlignment] $Alignment) {
+    if ($ColumnIndex -ge 0 -and $ColumnIndex -lt $this.Columns.Count) {
+      $this.Columns[$ColumnIndex].Alignment = $Alignment
     }
   }
 
@@ -82,8 +90,8 @@ class TreeNode {
 
       # Compute max individual column length
       for ($i = 0; $i -lt $columnsCount ; $i++) {
-        if ($columnsMaxLength[$i] -lt $_.Columns[$i].Length) {
-          $columnsMaxLength[$i] = $_.Columns[$i].Length
+        if ($columnsMaxLength[$i] -lt $_.Columns[$i].TextLength) {
+          $columnsMaxLength[$i] = $_.Columns[$i].TextLength
         }
       }
 
@@ -107,28 +115,21 @@ class TreeNode {
       $node = $_
       $node.Label = (@(0..($node.Columns.Count - 1) | ForEach-Object {
         $columnIndex = $_
-
-        # Get column alignment
-        $columnAlignment = $null
-        if ($node.ColumnsAlignment -and $node.ColumnsAlignment.ContainsKey($columnIndex)) {
-          $columnAlignment = $node.ColumnsAlignment[$columnIndex]
-        }
-        if (!($columnAlignment -imatch 'left|right|centered')) {
-          $columnAlignment = 'left'
-        }
+        $column = $node.Columns[$columnIndex]
 
         # Pad the column
-        switch ($columnAlignment) {
-          'left' {
-            $node.Columns[$columnIndex].Trim().PadRight($columnsMaxLength[$columnIndex], ' ')
+        $invisibleCharacters = $column.Text.Length - $column.TextLength
+        switch ($column.Alignment) {
+          'Left' {
+            $column.Text.PadRight($columnsMaxLength[$columnIndex] + $invisibleCharacters, ' ')
           }
-          'right' {
-            $node.Columns[$columnIndex].Trim().PadLeft($columnsMaxLength[$columnIndex], ' ')
+          'Right' {
+            $column.Text.PadLeft($columnsMaxLength[$columnIndex] + $invisibleCharacters, ' ')
           }
-          'centered' {
-            $col = $node.Columns[$columnIndex].Trim()
-            $col = $col.PadRight(($columnsMaxLength[$columnIndex] - $col.Length) / 2 + $col.Length, ' ')
-            $col = $col.PadLeft($columnsMaxLength[$columnIndex], ' ')
+          'Centered' {
+            $col = $column.Text
+            $col = $col.PadRight(($columnsMaxLength[$columnIndex] - $column.TextLength) / 2 + $column.TextLength + $invisibleCharacters, ' ')
+            $col = $col.PadLeft($columnsMaxLength[$columnIndex] + $invisibleCharacters, ' ')
             $col
           }
         }
