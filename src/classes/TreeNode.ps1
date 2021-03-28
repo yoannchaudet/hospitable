@@ -3,6 +3,7 @@
 ###
 
 enum ColumnAlignment {
+  Default
   Left
   Right
   Centered
@@ -36,13 +37,13 @@ class TreeNode {
   # Build a new tree node
   TreeNode([String[]] $Columns) {
     # Init properties
-    $columnsCount = $Columns ? $Columns.Count : 0
+    $columnsCount = $null -ne $Columns ? $Columns.Count : 0
     $this.Columns = $columnsCount -lt 1 ? @() : ($Columns | ForEach-Object {
       $trimmedText = $_.Trim()
       [TreeNodeColumn] @{
         Text = $trimmedText
         TextLength = Get-FormattedStringLength $trimmedText
-        Alignment = [ColumnAlignment]::Left
+        Alignment = [ColumnAlignment]::Default
       }
     })
     $this.Label = ''
@@ -57,16 +58,42 @@ class TreeNode {
   # Note: we could have introduced a version accepting a TreeNode object too but that would
   # suddenly allow one to build recursive trees. So we are just allowing New-TreeNode to create roots.
   [TreeNode] AddChild([String[]] $Columns) {
-    $child = [TreeNode]::New($Columns)
+    if ($Columns -eq $null) {
+      throw "Columns cannot be null"
+    }
+
+    # Create the child node
+    $child = New-TreeNode $Columns
+
+    # Inherit the column alignment from the parent
+    for ($i = 0; $i -lt [Math]::Min($Columns.Count, $this.Columns.Count); $i++) {
+      $child.SetColumnAlignment($i, $this.Columns[$i].Alignment)
+    }
+
+    # Ad the child node and return it
     $this.Children.Add($child)
     return $child
   }
 
   # Set column alignment for a given column
+  # Note: when alignment is set for a given node, children will inherit the same alignment by default unless overwritten
   [void] SetColumnAlignment([int] $ColumnIndex, [ColumnAlignment] $Alignment) {
-    if ($ColumnIndex -ge 0 -and $ColumnIndex -lt $this.Columns.Count) {
-      $this.Columns[$ColumnIndex].Alignment = $Alignment
+    # Ignore negative index
+    if ($ColumnIndex -lt 0) {
+      return
     }
+
+    # If the index is out of bound, create new empty columns
+    while ($ColumnIndex -ge $this.Columns.Count) {
+      $this.Columns += [TreeNodeColumn] @{
+        Text = ''
+        TextLength = 0
+        Alignment = [ColumnAlignment]::Default
+      }
+    }
+
+    # Set the alignment
+    $this.Columns[$ColumnIndex].Alignment = $Alignment
   }
 
   # Recursively compute the max length of each columns (per depth)
@@ -116,7 +143,7 @@ class TreeNode {
         # Pad the column
         $invisibleCharacters = $column.Text.Length - $column.TextLength
         switch ($column.Alignment) {
-          'Left' {
+          { $_ -in 'Default', 'Left' } {
             $column.Text.PadRight($columnsMaxLength[$columnIndex] + $invisibleCharacters, ' ')
           }
           'Right' {

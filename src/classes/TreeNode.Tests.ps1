@@ -3,21 +3,96 @@ Remove-Module -Name 'Hospitable' -Force -ErrorAction 'SilentlyContinue'
 Import-Module (Join-Path $PSScriptRoot '../Hospitable.psm1')
 
 InModuleScope Hospitable {
-  Describe 'TreeNode.SetColumnAlignment' {
-    It 'Sets column alignment just fine' {
-      $node = New-TreeNode @('col1', 'col2')
-      $node.SetColumnAlignment(1, 'Left')
-      $node.Columns[1].Alignment | Should -Be 'Left'
-      $node.SetColumnAlignment(1, 'Centered')
-      $node.Columns[1].Alignment | Should -Be 'Centered'
-      $node.SetColumnAlignment(1, 'Right')
-      $node.Columns[1].Alignment | Should -Be 'Right'
+  Describe 'TreeNode.AddChild' {
+    It 'Validates columns is not null' {
+      $node = New-TreeNode
+      { $node.AddChild($null) } | Should -Throw
     }
 
-    It 'Column alignment type is validated' {
+    It 'Add children (1-column)' {
+      $node = New-TreeNode
+      $node.Children.Count | Should -Be 0
+      $child = $node.AddChild('')
+      $node.Children.Count | Should -Be 1
+      $child.Columns.Count | Should -Be 1
+      $child.Columns[0].Text | Should -Be ''
+      $child.Columns[0].TextLength | Should -Be 0
+      $child.Columns[0].Alignment | Should -Be 'Default'
+    }
+
+    It 'Add children (n-column)' {
+      $node = New-TreeNode
+      $node.Children.Count | Should -Be 0
+      $child = $node.AddChild(@(1, 2, 3))
+      $node.Children.Count | Should -Be 1
+      $child.Columns.Count | Should -Be 3
+    }
+
+    It 'Inherits parent alignments' {
+      $node = New-TreeNode @('test')
+      $node.SetColumnAlignment(0, 'Right')
+      $child = $node.AddChild('child')
+      $child.Columns[0].Alignment | Should -Be 'Right'
+    }
+
+    It 'Inherits parent alignments even with ghost columns' {
+      $node = New-TreeNode
+      $node.SetColumnAlignment(1, 'Centered')
+      $node.SetColumnAlignment(3, 'Right')
+
+      $child1 = $node.AddChild('col1')
+      $child1.Columns.Count | Should -Be 1
+      $child1.Columns[0].Alignment | Should -Be 'Default' # No inheritance
+
+      $child2 = $node.AddChild(@('col1', 'col2', 'col3'))
+      $child2.Columns.Count | Should -Be 3
+      $child2.Columns[0].Alignment | Should -Be 'Default'
+      $child2.Columns[1].Alignment | Should -Be 'Centered'
+      $child2.Columns[2].Alignment | Should -Be 'Default'
+
+      $child3 = $node.AddChild(@('col1', 'col2', 'col3', 'col4'))
+      $child3.Columns.Count | Should -Be 4
+      $child3.Columns[0].Alignment | Should -Be 'Default'
+      $child3.Columns[1].Alignment | Should -Be 'Centered'
+      $child3.Columns[2].Alignment | Should -Be 'Default'
+      $child3.Columns[3].Alignment | Should -Be 'Right'
+    }
+  }
+
+  Describe 'TreeNode.SetColumnAlignment' {
+    It 'Sets alignment on existing columns' {
+      $node = New-TreeNode @('col1', 'col2')
+      @('Default', 'Left', 'Right', 'Centered') | ForEach-Object {
+        $node.SetColumnAlignment(1, $_)
+        $node.Columns[1].Alignment | Should -Be $_
+      }
+    }
+
+    It 'Validates the alignment type' {
       $node = New-TreeNode
       { $node.SetColumnAlignment(0, $null) } | Should -Throw
       { $node.SetColumnAlignment(0, 'BadAlignment') } | Should -Throw
+    }
+
+    It 'Ignore negative indices' {
+      $node = New-TreeNode
+      $node.SetColumnAlignment(-1, 'Default')
+      $node.Columns.Count | Should -Be 0
+      $node.SetColumnAlignment(-2, 'Default')
+      $node.Columns.Count | Should -Be 0
+    }
+
+    It 'Adds empty columns when needed' {
+      $node = New-TreeNode
+      $node.Columns.Count | Should -Be 0
+      $node.SetColumnAlignment(1, 'Right')
+      $node.Columns.Count | Should -Be 2
+      $node.Columns[0].Text | Should -Be ''
+      $node.Columns[0].TextLength | Should -Be 0
+      $node.Columns[0].Alignment | Should -Be 'Default'
+      $node.Columns[1].Text | Should -Be ''
+      $node.Columns[1].TextLength | Should -Be 0
+      $node.Columns[1].Alignment | Should -Be 'Right'
     }
   }
 

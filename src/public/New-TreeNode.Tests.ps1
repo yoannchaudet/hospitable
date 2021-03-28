@@ -24,10 +24,10 @@ InModuleScope Hospitable {
       $node.Columns.Count | Should -Be 2
       $node.Columns[0].Text | Should -Be 'col1'
       $node.Columns[0].TextLength | Should -Be 4
-      $node.Columns[0].Alignment | Should -Be 'Left'
+      $node.Columns[0].Alignment | Should -Be 'Default'
       $node.Columns[1].Text | Should -Be ('col2' | Get-Bold)
       $node.Columns[1].TextLength | Should -Be (Get-FormattedStringLength ('col2' | Get-Bold))
-      $node.Columns[1].Alignment | Should -Be 'Left'
+      $node.Columns[1].Alignment | Should -Be 'Default'
       $node.Children.Count | Should -Be 0
     }
   }

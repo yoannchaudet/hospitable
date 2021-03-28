@@ -1,14 +1,16 @@
 ﻿function Get-Lists {
   <#
   .SYNOPSIS
-  Format a list of list.
+  Format a list (of lists).
 
   .PARAMETER List
-  The list of list of objects to format.
+  The list (of lists) of objects to format.
 
   .OUTPUTS
   The formatted string.
   #>
+
+  # TODO: Document the prefixes
 
   param (
     [object[]] $Lists,
