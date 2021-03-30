@@ -1,4 +1,4 @@
-﻿###
+###
 ### Everything to represent tree nodes
 ###
 
@@ -56,14 +56,14 @@ class TreeNode {
 
   # Add a new child to the current node and return it
   # Note: we could have introduced a version accepting a TreeNode object too but that would
-  # suddenly allow one to build recursive trees. So we are just allowing New-TreeNode to create roots.
+  # suddenly allow one to build recursive trees. So we are just allowing New-Tree to create roots.
   [TreeNode] AddChild([String[]] $Columns) {
-    if ($Columns -eq $null) {
+    if ($null -eq $Columns) {
       throw "Columns cannot be null"
     }
 
     # Create the child node
-    $child = New-TreeNode $Columns
+    $child = [TreeNode]::New($Columns)
 
     # Inherit the column alignment from the parent
     for ($i = 0; $i -lt [Math]::Min($Columns.Count, $this.Columns.Count); $i++) {

@@ -1,16 +1,45 @@
-﻿# Load (or reload) the module
+# Load (or reload) the module
 Remove-Module -Name 'Hospitable' -Force -ErrorAction 'SilentlyContinue'
 Import-Module (Join-Path $PSScriptRoot '../Hospitable.psm1')
 
 InModuleScope Hospitable {
+  Describe 'TreeNode.ctor' {
+    It 'Creates empty tree node' {
+      $node = [TreeNode]::New(@())
+      $node.Label | Should -Be ''
+      $node.Columns.Count | Should -Be 0
+      $node.Children.Count | Should -Be 0
+    }
+
+    It 'Creates one-column tree node' {
+      $node = [TreeNode]::New('label')
+      $node.Label | Should -Be ''
+      $node.Columns.Count | Should -Be 1
+      $node.Children.Count | Should -Be 0
+    }
+
+    It 'Creates n-column tree node' {
+      $node = [TreeNode]::New(@('col1', ('col2' | Get-Bold)))
+      $node.Label | Should -Be ''
+      $node.Columns.Count | Should -Be 2
+      $node.Columns[0].Text | Should -Be 'col1'
+      $node.Columns[0].TextLength | Should -Be 4
+      $node.Columns[0].Alignment | Should -Be 'Default'
+      $node.Columns[1].Text | Should -Be ('col2' | Get-Bold)
+      $node.Columns[1].TextLength | Should -Be (Get-FormattedStringLength ('col2' | Get-Bold))
+      $node.Columns[1].Alignment | Should -Be 'Default'
+      $node.Children.Count | Should -Be 0
+    }
+  }
+
   Describe 'TreeNode.AddChild' {
     It 'Validates columns is not null' {
-      $node = New-TreeNode
+      $node = New-Tree
       { $node.AddChild($null) } | Should -Throw
     }
 
     It 'Add children (1-column)' {
-      $node = New-TreeNode
+      $node = New-Tree
       $node.Children.Count | Should -Be 0
       $child = $node.AddChild('')
       $node.Children.Count | Should -Be 1
@@ -21,7 +50,7 @@ InModuleScope Hospitable {
     }
 
     It 'Add children (n-column)' {
-      $node = New-TreeNode
+      $node = New-Tree
       $node.Children.Count | Should -Be 0
       $child = $node.AddChild(@(1, 2, 3))
       $node.Children.Count | Should -Be 1
@@ -29,14 +58,14 @@ InModuleScope Hospitable {
     }
 
     It 'Inherits parent alignments' {
-      $node = New-TreeNode @('test')
+      $node = (New-Tree).AddChild(@('test'))
       $node.SetColumnAlignment(0, 'Right')
       $child = $node.AddChild('child')
       $child.Columns[0].Alignment | Should -Be 'Right'
     }
 
     It 'Inherits parent alignments even with ghost columns' {
-      $node = New-TreeNode
+      $node = New-Tree
       $node.SetColumnAlignment(1, 'Centered')
       $node.SetColumnAlignment(3, 'Right')
 
@@ -61,7 +90,7 @@ InModuleScope Hospitable {
 
   Describe 'TreeNode.SetColumnAlignment' {
     It 'Sets alignment on existing columns' {
-      $node = New-TreeNode @('col1', 'col2')
+      $node = (New-Tree).AddChild(@('col1', 'col2'))
       @('Default', 'Left', 'Right', 'Centered') | ForEach-Object {
         $node.SetColumnAlignment(1, $_)
         $node.Columns[1].Alignment | Should -Be $_
@@ -69,13 +98,13 @@ InModuleScope Hospitable {
     }
 
     It 'Validates the alignment type' {
-      $node = New-TreeNode
+      $node = New-Tree
       { $node.SetColumnAlignment(0, $null) } | Should -Throw
       { $node.SetColumnAlignment(0, 'BadAlignment') } | Should -Throw
     }
 
     It 'Ignore negative indices' {
-      $node = New-TreeNode
+      $node = New-Tree
       $node.SetColumnAlignment(-1, 'Default')
       $node.Columns.Count | Should -Be 0
       $node.SetColumnAlignment(-2, 'Default')
@@ -83,7 +112,7 @@ InModuleScope Hospitable {
     }
 
     It 'Adds empty columns when needed' {
-      $node = New-TreeNode
+      $node = New-Tree
       $node.Columns.Count | Should -Be 0
       $node.SetColumnAlignment(1, 'Right')
       $node.Columns.Count | Should -Be 2
@@ -99,7 +128,7 @@ InModuleScope Hospitable {
   Describe 'TreeNode.ComputeColumnsMaxLengthPerDepth' {
     It 'Recursively compute the max length per depth (1-column tree)' {
       # Create a simple tree
-      $node = New-TreeNode
+      $node = New-Tree
       $node.AddChild('b').AddChild('cccc')
 
       # Compute max length per depth
@@ -112,7 +141,7 @@ InModuleScope Hospitable {
 
     It 'Recursively compute the max length per depth (n-column tree)' {
       # Create a simple tree
-      $node = New-TreeNode
+      $node = New-Tree
       $node.AddChild(@('c1', 'c2', 'c3')).AddChild(@('a', 'aa'))
       $node.AddChild('a single long column')
       $node.AddChild(@('c1', 'c', 'ccc'))
@@ -131,7 +160,7 @@ InModuleScope Hospitable {
 
   Describe 'TreeNode.FormatChildren' {
     It 'Recursively format children' {
-      $node = New-TreeNode
+      $node = New-Tree
       $a = $node.AddChild('a')
       $b = $a.AddChild('b ')
       $c = $b.AddChild(@('c1', 'c2', 'c3'))
@@ -183,7 +212,7 @@ InModuleScope Hospitable {
     }
 
     It 'Formats children that are using text formatting' {
-      $node = New-TreeNode
+      $node = New-Tree
       $a = $node.AddChild((Get-Bold "a"))
 
       $columnsMaxLengthPerDepth = @{}

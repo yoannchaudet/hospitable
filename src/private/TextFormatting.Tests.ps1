@@ -1,4 +1,4 @@
-﻿# Load (or reload) the module
+# Load (or reload) the module
 Remove-Module -Name 'Hospitable' -Force -ErrorAction 'SilentlyContinue'
 Import-Module (Join-Path $PSScriptRoot '../Hospitable.psm1')
 

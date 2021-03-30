@@ -1,4 +1,4 @@
-﻿function Get-Bold {
+function Get-Bold {
   <#
   .SYNOPSIS
   Apply VT-100 modifiers to a string to format it in bold.

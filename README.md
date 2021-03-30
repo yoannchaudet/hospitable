@@ -95,21 +95,20 @@ Format a tree.
 Multi-root tree with one-column nodes:
 
 ```powershell
-# Build a root node
-$fruits = New-TreeNode 'Fruits'
+# Build a tree
+$tree = New-Tree
+$fruits = $tree.AddChild('Fruits')
 @('🥝 Kiwi', '🥭 Mango', '🍌 Banana') | ForEach-Object {
   # Add some children to the fruits root (Out-Null not to pollute stdout where each node would be printed when returned)
   $fruits.AddChild($_) | Out-Null
 }
-
-# Build another root node
-$vegetables = New-TreeNode 'Vegetables'
+$vegetables = $tree.AddChild('Vegetables')
 @('🥕 Carrot', '🥔 Potato') | ForEach-Object {
   $vegetables.AddChild($_) | Out-Null
 }
 
 # Get the tree
-Get-Tree $fruits, $vegetables
+Get-Tree $tree
 ```
 
 ![Get-Tree multi-root with one-column nodes](./images/get-tree1.png)
@@ -122,25 +121,25 @@ More complex trees are also supported. Namely:
 
 ```powershell
 # Build the tree
-$root = New-TreeNode '2021-03-25'
-$root.SetColumnAlignment(2, 'Right')
-$stock = $root.AddChild('Stock')
+$tree = New-Tree '2021-03-25'
+$tree.SetColumnAlignment(2, 'Right')
+$stock = $tree.AddChild('Stock')
 $itot = $stock.AddChild(@((Get-Bold 'ITOT'), 'iShares Core S&P Total US Stock Market ETF', (Get-Negative '$89.93')))
 $ixus = $stock.AddChild(@((Get-Bold 'IXUS'), 'iShares Core MSCI Total International Stock ETF', (Get-Negative '$69.50')))
-$crypto = $root.AddChild('Crypto')
+$crypto = $tree.AddChild('Crypto')
 $btc = $crypto.AddChild('Bitcoin')
 $gbtc = $btc.AddChild(@((Get-Bold 'GBTC'), 'Grayscale Bitcoin Trust (Btc)', (Get-Negative '$44.54')))
 @($itot, $ixus, $gbtc) | ForEach-Object { $_.SetColumnAlignment(0, 'Right') }
 
 # Get the tree
-Get-Tree $root
+Get-Tree $tree
 ```
 
 WIP: This looks very weird. Let's fix it. The way we do alignment is coming from Souvenirs and it does not make much sense here. Proposal:
 
 - always align nodes under a same parent (i.e. all children) - stop doing it for all nodes at the same depth (which is more complicated to compute...)
-- replace `New-TreeNode` by `New-Tree` (which will return an empty root so we don't have to do it in `Get-Tree`), adding children will be needed under the root
-- in Get-Tree add an option to pass a list of list of nodes to align together, e.g. `Get-Tree $root -AlignmentGroups ,@($stock, $gbtc)`
+- replace `New-Tree` by `New-Tree` (which will return an empty root so we don't have to do it in `Get-Tree`), adding children will be needed under the root
+- in Get-Tree add an option to pass a list of list of nodes to align together, e.g. `Get-Tree $tree -AlignmentGroups ,@($stock, $gbtc)`
 
 🎉
 

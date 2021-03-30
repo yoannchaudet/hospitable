@@ -1,4 +1,4 @@
-﻿#Requires -version 7.0
+#Requires -version 7.0
 
 # Init (applies to the entire module)
 Set-StrictMode -version 'Latest'

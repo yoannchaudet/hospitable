@@ -1,28 +1,23 @@
-﻿function Get-Tree {
+function Get-Tree {
   <#
   .SYNOPSIS
   Format a tree.
 
-  .PARAMETER Roots
-  The tree roots to format.
+  .PARAMETER Root
+  The tree root to format.
 
   .PARAMETER SpacesBetweenColumns
   The number of spaces to use to seperate columns in a node.
-
-  .PARAMETER PadColumnsCrossDepth
-  By default columns are padded for nodes of the same depth. This switch makes the padding
-  apply to all depths.
   #>
 
   # TODO: Document the prefixes
 
   param (
-    [Object[]] $Roots,
+    [Object] $Root,
     [String] $TreenInPrefix = (Get-SettingValue 'TREE_IN_PREFIX' '│  '),
     [String] $TreeBranchPrefix = (Get-SettingValue 'TREE_BRANCH_PREFIX' '├─ '),
     [String] $TreeLeafPrefix = (Get-SettingValue 'TREE_BRANCH_PREFIX' '└─ '),
-    [int] $SpacesBetweenColumns = 1,
-    [switch] $PadColumnsCrossDepth
+    [int] $SpacesBetweenColumns = 1
   )
 
   # Recursive function for formatting a tree node
@@ -109,17 +104,11 @@
   }
 
   # Format the tree
-  $invisibleRoot = New-TreeNode
-  $Roots | ForEach-Object { $invisibleRoot.Children.Add($_) }
   $columnsMaxLengthPerDepth = @{}
-  $invisibleRoot.ComputeColumnsMaxLengthPerDepth($columnsMaxLengthPerDepth, 0)
-  if ($PadColumnsCrossDepth) {
-    Join-ColumnsMaxLengthCrossDepth -ColumnsMaxLengthPerDepth $columnsMaxLengthPerDepth -IndentationLength $TreenInPrefix.Length
-  }
-  $invisibleRoot.FormatChildren($SpacesBetweenColumns, $columnsMaxLengthPerDepth, 0)
-  if ($Roots.Count -eq 1) {
-    Format-TreeNode -Node $Roots[0] -Indent "" -Last $true -Root $true
-  } else {
-    Format-TreeChildren -Children $Roots -Indent "" -Root $true
-  }
+  $Root.ComputeColumnsMaxLengthPerDepth($columnsMaxLengthPerDepth, 0)
+  # if ($PadColumnsCrossDepth) {
+  #   Join-ColumnsMaxLengthCrossDepth -ColumnsMaxLengthPerDepth $columnsMaxLengthPerDepth -IndentationLength $TreenInPrefix.Length
+  # }
+  $Root.FormatChildren($SpacesBetweenColumns, $columnsMaxLengthPerDepth, 0)
+  Format-TreeChildren -Children $Root.Children -Indent "" -Root $true
 }

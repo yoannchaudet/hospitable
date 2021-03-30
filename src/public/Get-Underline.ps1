@@ -1,4 +1,4 @@
-﻿function Get-Underline {
+function Get-Underline {
   <#
   .SYNOPSIS
   Apply VT-100 modifiers to a string to format it in underline.

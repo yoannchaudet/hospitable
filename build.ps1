@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env pwsh
+#!/usr/bin/env pwsh
 #Requires -Version 7.0 -Modules @{ ModuleName='Pester'; ModuleVersion='5.1.1' }
 
 <#

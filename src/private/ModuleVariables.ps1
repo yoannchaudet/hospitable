@@ -1,4 +1,4 @@
-﻿###
+###
 ### Module variables (used as constants) and utilities
 ###
 

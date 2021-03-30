@@ -1,4 +1,4 @@
-﻿function Get-Lists {
+function Get-Lists {
   <#
   .SYNOPSIS
   Format a list (of lists).

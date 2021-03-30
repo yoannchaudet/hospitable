@@ -1,4 +1,4 @@
-﻿function Get-Negative {
+function Get-Negative {
   <#
   .SYNOPSIS
   Apply VT-100 modifiers to a string to format it in negative.

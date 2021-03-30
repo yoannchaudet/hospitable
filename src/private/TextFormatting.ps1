@@ -1,4 +1,4 @@
-﻿###
+###
 ### Text formatting utility functions
 ###
 
