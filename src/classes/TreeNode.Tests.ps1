@@ -125,36 +125,60 @@ InModuleScope Hospitable {
     }
   }
 
-  Describe 'TreeNode.ComputeColumnsMaxLengthPerDepth' {
-    It 'Recursively compute the max length per depth (1-column tree)' {
-      # Create a simple tree
-      $node = New-Tree
-      $node.AddChild('b').AddChild('cccc')
+  Describe 'TreeNode.GetMaxList' {
+    It 'Handles null or empty lists' {
+      $l = [TreeNode]::GetMaxList($null)
+      $l.Length | Should -Be 0
 
-      # Compute max length per depth
-      $columnsMaxLengthPerDepth = @{}
-      $node.ComputeColumnsMaxLengthPerDepth($columnsMaxLengthPerDepth, 0)
-      $columnsMaxLengthPerDepth.Count | Should -Be 2
-      $columnsMaxLengthPerDepth[0][0] | Should -Be 1
-      $columnsMaxLengthPerDepth[1][0] | Should -Be 4
+      $l = [TreeNode]::GetMaxList(@())
+      $l.Length | Should -Be 0
+    }
+
+    It 'Computes max list (array of array)' {
+      $l = [TreeNode]::GetMaxList(@($null, @(1, -2), @(), @(2), @(0, -1, 3)))
+      $l.Length | Should -Be 3
+      $l[0] | Should -Be 2
+      $l[1] | Should -Be -1
+      $l[2] | Should -Be 3
+    }
+
+    It 'Computes max list (array)' {
+      $l = [TreeNode]::GetMaxList(@(1, 2))
+      $l.Length | Should -Be 1
+      $l[0] | Should -Be 2
+    }
+  }
+
+  Describe 'TreeNode.ComputeColumnsMaxLengthPerParent' {
+    It 'Recursively compute the max length per parent (1-column tree)' {
+      # Create a simple tree
+      $tree = New-Tree
+      $tree.AddChild('b').AddChild('cccc')
+
+      # Compute max length per parent
+      $columnsMaxLengthPerParent = @{}
+      [TreeNode]::ComputeColumnsMaxLengthPerParent($columnsMaxLengthPerParent, $tree)
+      $columnsMaxLengthPerParent.Count | Should -Be 2
+      $columnsMaxLengthPerParent[$tree][0] | Should -Be 1
+      $columnsMaxLengthPerParent[$tree.Children[0]][0] | Should -Be 4
     }
 
     It 'Recursively compute the max length per depth (n-column tree)' {
       # Create a simple tree
-      $node = New-Tree
-      $node.AddChild(@('c1', 'c2', 'c3')).AddChild(@('a', 'aa'))
-      $node.AddChild('a single long column')
-      $node.AddChild(@('c1', 'c', 'ccc'))
+      $tree = New-Tree
+      $tree.AddChild(@('c1', 'c2', 'c3')).AddChild(@('a', 'aa'))
+      $tree.AddChild('a single long column')
+      $tree.AddChild(@('c1', 'c', 'ccc'))
 
-      # Compute max length per depth
-      $columnsMaxLengthPerDepth = @{}
-      $node.ComputeColumnsMaxLengthPerDepth($columnsMaxLengthPerDepth, 0)
-      $columnsMaxLengthPerDepth.Count | Should -Be 2
-      $columnsMaxLengthPerDepth[0][0] | Should -Be 'a single long column'.Length
-      $columnsMaxLengthPerDepth[0][1] | Should -Be 2
-      $columnsMaxLengthPerDepth[0][2] | Should -Be 3
-      $columnsMaxLengthPerDepth[1][0] | Should -Be 1
-      $columnsMaxLengthPerDepth[1][1] | Should -Be 2
+      # Compute max length per parent
+      $columnsMaxLengthPerParent = @{}
+      [TreeNode]::ComputeColumnsMaxLengthPerParent($columnsMaxLengthPerParent, $tree)
+      $columnsMaxLengthPerParent.Count | Should -Be 2
+      $columnsMaxLengthPerParent[$tree][0] | Should -Be 'a single long column'.Length
+      $columnsMaxLengthPerParent[$tree][1] | Should -Be 2
+      $columnsMaxLengthPerParent[$tree][2] | Should -Be 3
+      $columnsMaxLengthPerParent[$tree.Children[0]][0] | Should -Be 1
+      $columnsMaxLengthPerParent[$tree.Children[0]][1] | Should -Be 2
     }
   }
 
@@ -165,13 +189,13 @@ InModuleScope Hospitable {
       $b = $a.AddChild('b ')
       $c = $b.AddChild(@('c1', 'c2', 'c3'))
 
-      $columnsMaxLengthPerDepth = @{}
-      $columnsMaxLengthPerDepth[0] = @(1)
-      $columnsMaxLengthPerDepth[1] = @(3)
-      $columnsMaxLengthPerDepth[2] = @(3, 4, 6)
+      $columnsMaxLengthPerParent = @{}
+      $columnsMaxLengthPerParent[$node] = @(1)
+      $columnsMaxLengthPerParent[$a] = @(3)
+      $columnsMaxLengthPerParent[$b] = @(3, 4, 6)
 
       # Default alignment (left)
-      $node.FormatChildren(1, $columnsMaxLengthPerDepth, 0)
+      $node.FormatChildren(1, $columnsMaxLengthPerParent)
       $a.Label | Should -Be 'a'
       $b.Label | Should -Be 'b' # 'b ' should have been trimmed
       $c.Label | Should -Be 'c1  c2   c3'
@@ -180,7 +204,7 @@ InModuleScope Hospitable {
       $a.SetColumnAlignment(0, 'Left')
       $b.SetColumnAlignment(0, 'Left')
       0..2 | ForEach-Object { $c.SetColumnAlignment($_, 'Left') }
-      $node.FormatChildren(2, $columnsMaxLengthPerDepth, 0)
+      $node.FormatChildren(2, $columnsMaxLengthPerParent)
       $a.Label | Should -Be 'a'
       $b.Label | Should -Be 'b' # 'b ' should have been right trimmed
       $c.Label | Should -Be 'c1   c2    c3'
@@ -189,7 +213,7 @@ InModuleScope Hospitable {
       $a.SetColumnAlignment(0, 'Right')
       $b.SetColumnAlignment(0, 'Right')
       0..2 | ForEach-Object { $c.SetColumnAlignment($_, 'Right') }
-      $node.FormatChildren(1, $columnsMaxLengthPerDepth, 0)
+      $node.FormatChildren(1, $columnsMaxLengthPerParent)
       $a.Label | Should -Be 'a'
       $b.Label | Should -Be '  b'
       $c.Label | Should -Be ' c1   c2     c3'
@@ -198,7 +222,7 @@ InModuleScope Hospitable {
       $a.SetColumnAlignment(0, 'Centered')
       $b.SetColumnAlignment(0, 'Centered')
       0..2 | ForEach-Object { $c.SetColumnAlignment($_, 'Centered') }
-      $node.FormatChildren(1, $columnsMaxLengthPerDepth, 0)
+      $node.FormatChildren(1, $columnsMaxLengthPerParent)
       $a.Label | Should -Be 'a'
       $b.Label | Should -Be ' b' # should be right trimmed
       $c.Label | Should -Be ' c1  c2    c3'
@@ -207,7 +231,7 @@ InModuleScope Hospitable {
       $c.SetColumnAlignment(0, 'Right')
       $c.SetColumnAlignment(1, 'Left')
       $c.SetColumnAlignment(2, 'Centered')
-      $node.FormatChildren(1, $columnsMaxLengthPerDepth, 0)
+      $node.FormatChildren(1, $columnsMaxLengthPerParent)
       $c.Label | Should -Be ' c1 c2     c3'
     }
 
@@ -215,26 +239,26 @@ InModuleScope Hospitable {
       $node = New-Tree
       $a = $node.AddChild((Get-Bold "a"))
 
-      $columnsMaxLengthPerDepth = @{}
-      $columnsMaxLengthPerDepth[0] = @(3)
+      $columnsMaxLengthPerParent = @{}
+      $columnsMaxLengthPerParent[$node] = @(3)
 
       # Default alignment (left)
-      $node.FormatChildren(1, $columnsMaxLengthPerDepth, 0)
+      $node.FormatChildren(1, $columnsMaxLengthPerParent)
       $a.Label | Should -Be "$('a' | Get-Bold)"
 
       # Left alignment
       $a.SetColumnAlignment(0, 'Right')
-      $node.FormatChildren(1, $columnsMaxLengthPerDepth, 0)
+      $node.FormatChildren(1, $columnsMaxLengthPerParent)
       $a.Label | Should -Be "  $('a' | Get-Bold)"
 
       # Centered alignment
       $a.SetColumnAlignment(0, 'Centered')
-      $node.FormatChildren(1, $columnsMaxLengthPerDepth, 0)
+      $node.FormatChildren(1, $columnsMaxLengthPerParent)
       $a.Label | Should -Be " $('a' | Get-Bold)"
 
       # Centered alignment (unbalanced)
-      $columnsMaxLengthPerDepth[0] = @(6)
-      $node.FormatChildren(1, $columnsMaxLengthPerDepth, 0)
+      $columnsMaxLengthPerParent[$node] = @(6)
+      $node.FormatChildren(1, $columnsMaxLengthPerParent)
       $a.Label | Should -Be "   $('a' | Get-Bold)"
     }
   }

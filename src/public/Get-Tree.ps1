@@ -104,11 +104,11 @@ function Get-Tree {
   }
 
   # Format the tree
-  $columnsMaxLengthPerDepth = @{}
-  $Root.ComputeColumnsMaxLengthPerDepth($columnsMaxLengthPerDepth, 0)
+  $columnsMaxLengthPerParent = @{}
+  [TreeNode]::ComputeColumnsMaxLengthPerParent($columnsMaxLengthPerParent, $Root)
   # if ($PadColumnsCrossDepth) {
   #   Join-ColumnsMaxLengthCrossDepth -ColumnsMaxLengthPerDepth $columnsMaxLengthPerDepth -IndentationLength $TreenInPrefix.Length
   # }
-  $Root.FormatChildren($SpacesBetweenColumns, $columnsMaxLengthPerDepth, 0)
+  $Root.FormatChildren($SpacesBetweenColumns, $columnsMaxLengthPerParent)
   Format-TreeChildren -Children $Root.Children -Indent "" -Root $true
 }

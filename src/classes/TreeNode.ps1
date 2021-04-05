@@ -96,42 +96,62 @@ class TreeNode {
     $this.Columns[$ColumnIndex].Alignment = $Alignment
   }
 
-  # Recursively compute the max length of each columns (per depth)
-  hidden [void] ComputeColumnsMaxLengthPerDepth([Hashtable] $ColumnsMaxLengthPerDepth, [int] $Depth) {
-    # Compute the column max lengths for the current children
-    $this.Children | Where-Object { $_.Columns.Count -gt 0 } | ForEach-Object {
-      # Get the columns count for the child
-      $columnsCount = $_.Columns.Count
+  # Return the max array from an array of array (of potentially different lengths)
+  hidden static [int[]] GetMaxList([int[][]] $List) {
+    # Init a max array
+    $max = @()
 
-      # Get the columns max length array for the current depth (create it if needed)
-      $columnsMaxLength = $ColumnsMaxLengthPerDepth.ContainsKey($Depth) ? $ColumnsMaxLengthPerDepth[$Depth] : @()
-
-      # Add elements in the array
-      if ($columnsMaxLength.Count -lt $columnsCount) {
-        ($columnsMaxLength.Length)..($columnsCount - 1) | ForEach-Object { $columnsMaxLength += 0 }
+    # Iterate over the first level of the array
+    $List | ForEach-Object {
+      # Discard bad data
+      if (-Not $_) {
+        return
       }
 
-      # Compute max individual column length
-      for ($i = 0; $i -lt $columnsCount ; $i++) {
-        if ($columnsMaxLength[$i] -lt $_.Columns[$i].TextLength) {
-          $columnsMaxLength[$i] = $_.Columns[$i].TextLength
+      # Get number of elements in current array
+      $count = $_.Count
+
+      # Add elements in the max array if needed
+      if ($max.Count -lt $count) {
+        ($max.Count)..($count - 1) | ForEach-Object { $max += [int]::MinValue }
+      }
+
+      # Compute max array
+      for ($i = 0; $i -lt $count ; $i++) {
+        if ($max[$i] -lt $_[$i]) {
+          $max[$i] = $_[$i]
         }
       }
-
-      # Store the array back in the hashtable
-      $ColumnsMaxLengthPerDepth[$Depth] = $columnsMaxLength
     }
 
-    # Continue recursively
-    $this.Children | ForEach-Object {
-      $_.ComputeColumnsMaxLengthPerDepth($ColumnsMaxLengthPerDepth, $Depth + 1)
+    # Return the max array
+    return $max
+  }
+
+  hidden static [void] ComputeColumnsMaxLengthPerParent([Hashtable] $ColumnsMaxLengthPerParent, [TreeNode] $Node) {
+    # Ignore node with no children (stop recursion)
+    if (0 -eq $Node.Children.Count) {
+      return
     }
+
+    # Get children columns length array and initiate recursion
+    $childrenColumnsMaxLength = @($Node.Children | ForEach-Object {
+      ,($_.Columns | ForEach-Object { $_.TextLength })
+      [TreeNode]::ComputeColumnsMaxLengthPerParent($ColumnsMaxLengthPerParent, $_)
+    })
+    if (-not $childrenColumnsMaxLength[0] -is [array]) {
+      # Pipes don't preserve int[][] if only one element is returned, fix that here
+      $childrenColumnsMaxLength = ,$childrenColumnsMaxLength
+    }
+
+    # Compute and store the max length array for the parent
+    $ColumnsMaxLengthPerParent[$Node] = [TreeNode]::GetMaxList($childrenColumnsMaxLength)
   }
 
   # Recursively format the label of every column-based node in the tree
-  hidden [void] FormatChildren([int] $SpacesBetweenColumns, [Hashtable] $ColumnsMaxLengthPerDepth, [int] $Depth) {
-    # Get the columns max length for this depth
-    $columnsMaxLength = $ColumnsMaxLengthPerDepth.ContainsKey($Depth) ? $ColumnsMaxLengthPerDepth[$Depth] : @()
+  hidden [void] FormatChildren([int] $SpacesBetweenColumns, [Hashtable] $ColumnsMaxLengthPerParent) {
+    # Get the columns max length for the current node
+    $columnsMaxLength = $ColumnsMaxLengthPerParent.ContainsKey($this) ? $ColumnsMaxLengthPerParent[$this] : @()
 
     # Format the children that have columns
     $this.Children | Where-Object { $_.Columns.Count -gt 0 } | ForEach-Object {
@@ -161,7 +181,7 @@ class TreeNode {
 
     # Continue recursively
     $this.Children | ForEach-Object {
-      $_.FormatChildren($SpacesBetweenColumns, $ColumnsMaxLengthPerDepth, $Depth + 1)
+      $_.FormatChildren($SpacesBetweenColumns, $ColumnsMaxLengthPerParent)
     }
   }
 }
