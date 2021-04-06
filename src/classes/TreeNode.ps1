@@ -10,9 +10,17 @@ enum ColumnAlignment {
 }
 
 class TreeNodeColumn {
+  # Text to display in the column
   [String] $Text
+
+  # Text lengh
   [int] $TextLength
+
+  # Column alignment
   [ColumnAlignment] $Alignment
+
+  # Column length (which may include padding)
+  [int] $ColumnLength
 }
 
 class TreeNode {
@@ -102,61 +110,41 @@ class TreeNode {
     $this.Columns[$ColumnIndex].Alignment = $Alignment
   }
 
-  # Return the max array from an array of array (of potentially different lengths)
-  hidden static [int[]] GetMaxList([int[][]] $List) {
-    # Make sure the list has two dimensions
-    ConvertTo-TwoDimensionsArray ([ref] $List)
-
-    # Init a max array
-    $max = @()
-
-    # Iterate over the first level of the array
-    $List | ForEach-Object {
-      # Get number of elements in current array
-      $count = $_.Count
-
-      # Add elements in the max array if needed
-      if ($max.Count -lt $count) {
-        ($max.Count)..($count - 1) | ForEach-Object { $max += [int]::MinValue }
-      }
-
-      # Compute max array
-      for ($i = 0; $i -lt $count ; $i++) {
-        if ($max[$i] -lt $_[$i]) {
-          $max[$i] = $_[$i]
-        }
-      }
-    }
-
-    # Return the max array
-    return $max
-  }
-
-  hidden static [void] ComputeColumnsMaxLengthPerParent([Hashtable] $ColumnsMaxLengthPerParent, [TreeNode] $Node) {
-    # Ignore node with no children (stop recursion)
-    if (0 -eq $Node.Children.Count) {
+  # Compute the default columns length for the current node and recursively through
+  # the tree
+  [void] ComputeDefaultColumnsLength() {
+    # Stop recursion at leaf nodes
+    if (0 -eq $this.Children.Count) {
       return
     }
 
-    # Get children columns length array and initiate recursion
-    $childrenColumnsMaxLength = @($Node.Children | ForEach-Object {
-      ,($_.Columns | ForEach-Object { $_.TextLength })
-      [TreeNode]::ComputeColumnsMaxLengthPerParent($ColumnsMaxLengthPerParent, $_)
-    })
-    if (-not $childrenColumnsMaxLength[0] -is [array]) {
-      # Pipes don't preserve int[][] if only one element is returned, fix that here
-      $childrenColumnsMaxLength = ,$childrenColumnsMaxLength
+    # Arrange in a two-dimension array the columns length of the direct children
+    $childrenColumnsLength = @()
+    $this.Children | ForEach-Object {
+      $childrenColumnsLength += ,($_.Columns | ForEach-Object { $_.TextLength })
     }
 
-    # Compute and store the max length array for the parent
-    $ColumnsMaxLengthPerParent[$Node] = [TreeNode]::GetMaxList($childrenColumnsMaxLength)
+    # Compute the default columns length and assign it to the children
+    $childrenColumnsLength = @(Get-MaxArray $childrenColumnsLength)
+    $this.Children | ForEach-Object {
+      $cols = $_.Columns
+      for ($i = 0; $i -lt [Math]::Min($childrenColumnsLength.Count, $cols.Count); $i++) {
+        $cols[$i].ColumnLength = $childrenColumnsLength[$i]
+      }
+    }
+
+    # Recurse
+    $this.Children | ForEach-Object {
+      $_.ComputeDefaultColumnsLength()
+    }
   }
 
-  # Recursively format the label of every column-based node in the tree
-  hidden [void] FormatChildren([int] $SpacesBetweenColumns, [Hashtable] $ColumnsMaxLengthPerParent) {
-    # Get the columns max length for the current node
-    $columnsMaxLength = $ColumnsMaxLengthPerParent.ContainsKey($this) ? $ColumnsMaxLengthPerParent[$this] : @()
+  ###
+  ### Static methods
+  ###
 
+  # Recursively format the label of every column-based node in the tree
+  hidden [void] FormatChildren([int] $SpacesBetweenColumns) {
     # Format the children that have columns
     $this.Children | Where-Object { $_.Columns.Count -gt 0 } | ForEach-Object {
       $node = $_
@@ -168,15 +156,15 @@ class TreeNode {
         $invisibleCharacters = $column.Text.Length - $column.TextLength
         switch ($column.Alignment) {
           { $_ -in 'Default', 'Left' } {
-            $column.Text.PadRight($columnsMaxLength[$columnIndex] + $invisibleCharacters, ' ')
+            $column.Text.PadRight($column.ColumnLength + $invisibleCharacters, ' ')
           }
           'Right' {
-            $column.Text.PadLeft($columnsMaxLength[$columnIndex] + $invisibleCharacters, ' ')
+            $column.Text.PadLeft($column.ColumnLength + $invisibleCharacters, ' ')
           }
           'Centered' {
             $col = $column.Text
-            $col = $col.PadRight(($columnsMaxLength[$columnIndex] - $column.TextLength) / 2 + $column.TextLength + $invisibleCharacters, ' ')
-            $col = $col.PadLeft($columnsMaxLength[$columnIndex] + $invisibleCharacters, ' ')
+            $col = $col.PadRight(($column.ColumnLength - $column.TextLength) / 2 + $column.TextLength + $invisibleCharacters, ' ')
+            $col = $col.PadLeft($column.ColumnLength + $invisibleCharacters, ' ')
             $col
           }
         }
@@ -185,7 +173,7 @@ class TreeNode {
 
     # Continue recursively
     $this.Children | ForEach-Object {
-      $_.FormatChildren($SpacesBetweenColumns, $ColumnsMaxLengthPerParent)
+      $_.FormatChildren($SpacesBetweenColumns)
     }
   }
 }

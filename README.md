@@ -76,7 +76,7 @@ Get-Negative negative
 
 ### Get-Lists
 
-Format a list of lists.
+Format a list (of lists).
 
 ```powershell
 # A 3-element list including a nested list
@@ -91,8 +91,6 @@ Get-Lists ('item 1' | Get-Underline), ('item 2' | Get-Underline)
 ### Get-Tree
 
 Format a tree.
-
-Multi-root tree with one-column nodes:
 
 ```powershell
 # Build a tree
@@ -113,11 +111,11 @@ Get-Tree $tree
 
 ![Get-Tree multi-root with one-column nodes](./images/get-tree1.png)
 
-More complex trees are also supported. Namely:
+In addition, the following complex formatting are supported:
 
-- Each node may have multiple columns
-- Columns can be aligned (left, right or centered) — the alignment is inherited from parent to children (and can be overwritten)
-- Columns alignment (or padding) is applied to all nodes at a given depth
+- A node may have multiple columns (i.e. space-separated strings)
+- Columns can be aligned (left, right, centered), the alignment is inherited from parent to children and can be overridden
+- Columns are padded to the longest column of nodes under a same parent, this behavior can be overridden with groups (WIP rename)
 
 ```powershell
 # Build the tree

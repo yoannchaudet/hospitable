@@ -107,22 +107,21 @@ function Get-Tree {
     }
   }
 
-  # Compute the max length array for each parent
-  $columnsMaxLengthPerParent = @{}
-  [TreeNode]::ComputeColumnsMaxLengthPerParent($columnsMaxLengthPerParent, $Root)
+  # Compute default columns length
+  $Root.ComputeDefaultColumnsLength()
 
   # Handle alignment groups
-  if ($AlignmentGroups) {
-    ConvertTo-TwoDimensionsArray ([ref] $AlignmentGroups)
-    $AlignmentGroups | ForEach-Object {
-      $lengthPerAlignmentGroup = $_ | ForEach-Object { ,$columnsMaxLengthPerParent[$_] }
-      ConvertTo-TwoDimensionsArray ([ref] $lengthPerAlignmentGroup)
-      $maxLength = [TreeNode]::GetMaxList($lengthPerAlignmentGroup)
-      $_ | ForEach-Object { $columnsMaxLengthPerParent[$_] = $maxLength }
-    }
-  }
+  # if ($AlignmentGroups) {
+  #   ConvertTo-TwoDimensionsArray ([ref] $AlignmentGroups)
+  #   $AlignmentGroups | ForEach-Object {
+  #     $lengthPerAlignmentGroup = $_ | ForEach-Object { ,$columnsMaxLengthPerParent[$_] }
+  #     ConvertTo-TwoDimensionsArray ([ref] $lengthPerAlignmentGroup)
+  #     $maxLength = [TreeNode]::GetMaxList($lengthPerAlignmentGroup)
+  #     $_ | ForEach-Object { $columnsMaxLengthPerParent[$_] = $maxLength }
+  #   }
+  # }
 
   # Format the tree
-  $Root.FormatChildren($SpacesBetweenColumns, $columnsMaxLengthPerParent)
+  $Root.FormatChildren($SpacesBetweenColumns)
   Format-TreeChildren -Children $Root.Children -Indent '' -Root $true
 }

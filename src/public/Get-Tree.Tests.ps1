@@ -93,7 +93,7 @@ root
 "@
     }
 
-    It 'Formats tree with alignment groups' {
+    It 'Formats tree with alignment groups (same depth)' {
       # Create a tree
       $tree = New-Tree
       $node1 = $tree.AddChild('French')
@@ -110,23 +110,42 @@ Spanish
 └─ hola hello
 "@
 
-      # With alignment groups
-      $out = @(Get-Tree $tree -AlignmentGroups ($bonjour, $hola)) -Join [Environment]::NewLine
+#       # With alignment groups
+#       $out = @(Get-Tree $tree -AlignmentGroups ($bonjour, $hola)) -Join [Environment]::NewLine
+#       $out | Should -Be @"
+# French
+# └─ bonjour hello
+# Spanish
+# └─ hola    hello
+# "@
+
+#       # With proper alignment groups
+#       $out = @(Get-Tree $tree -AlignmentGroups (,($node1, $node2))) -Join [Environment]::NewLine
+#       $out | Should -Be @"
+# French
+# └─ bonjour hello
+# Spanish
+# └─ hola    hello
+# "@
+    }
+
+    It 'Formats tree with alignment groups (different depth)' {
+      # Create a tree
+      $tree = New-Tree
+      $node1 = $tree.AddChild('French')
+      $node2 = $tree.AddChild(('hola', 'hello'))
+      $bonjour = $node1.AddChild(('bonjour', 'hello'))
+
+      # Regular formatting ('hola' is padded to match 'French')
+      $out = @(Get-Tree $tree) -Join [Environment]::NewLine
       $out | Should -Be @"
 French
 └─ bonjour hello
-Spanish
-└─ hola    hello
+hola   hello
 "@
 
-      # With proper alignment groups
-      $out = @(Get-Tree $tree -AlignmentGroups (,($node1, $node2))) -Join [Environment]::NewLine
-      $out | Should -Be @"
-French
-└─ bonjour hello
-Spanish
-└─ hola    hello
-"@
+      # With alignment groups
+
     }
   }
 }
