@@ -139,10 +139,6 @@ class TreeNode {
     }
   }
 
-  ###
-  ### Static methods
-  ###
-
   # Recursively format the label of every column-based node in the tree
   hidden [void] FormatChildren([int] $SpacesBetweenColumns) {
     # Format the children that have columns

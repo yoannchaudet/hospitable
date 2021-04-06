@@ -14,6 +14,7 @@ function Get-Tree {
   #>
 
   # TODO: Document the prefixes
+  # TODO: handle $root = $null (it fails now), add a test
 
   param (
     [object] $Root,
@@ -72,54 +73,41 @@ function Get-Tree {
     }
   }
 
-  # Utility function for computing a global (cross depth) columns max length array
-  function Join-ColumnsMaxLengthCrossDepth() {
-    param (
-      [Hashtable] $ColumnsMaxLengthPerDepth,
-      [int] $IndentationLength
-    )
-
-    # Get the max length per column cross all depth
-    $maxLengthPerColumn = @()
-    $maxDepth = $ColumnsMaxLengthPerDepth.Count
-    $ColumnsMaxLengthPerDepth.GetEnumerator() | ForEach-Object {
-      $columns = $_.Value
-      $columnsCount = $columns.Count
-
-      # Add elements in the array
-      if ($maxLengthPerColumn.Count -lt $columnsCount) {
-        ($maxLengthPerColumn.Length)..($columnsCount - 1) | ForEach-Object { $maxLengthPerColumn += 0 }
-      }
-
-      # Get the max lengths
-      0..($columnsCount - 1) | ForEach-Object {
-        if ($maxLengthPerColumn[$_] -lt $columns[$_]) {
-          $maxLengthPerColumn[$_] = $columns[$_]
-        }
-      }
-    }
-
-    # Update the hashtable
-    @($ColumnsMaxLengthPerDepth.Keys) | ForEach-Object {
-      $ColumnsMaxLengthPerDepth[$_] = $maxLengthPerColumn.Clone()
-      # Accomodate indentation
-      $ColumnsMaxLengthPerDepth[$_][0] += ($maxDepth - $_ - 1) * $IndentationLength
-    }
-  }
-
   # Compute default columns length
   $Root.ComputeDefaultColumnsLength()
 
   # Handle alignment groups
-  # if ($AlignmentGroups) {
-  #   ConvertTo-TwoDimensionsArray ([ref] $AlignmentGroups)
-  #   $AlignmentGroups | ForEach-Object {
-  #     $lengthPerAlignmentGroup = $_ | ForEach-Object { ,$columnsMaxLengthPerParent[$_] }
-  #     ConvertTo-TwoDimensionsArray ([ref] $lengthPerAlignmentGroup)
-  #     $maxLength = [TreeNode]::GetMaxList($lengthPerAlignmentGroup)
-  #     $_ | ForEach-Object { $columnsMaxLengthPerParent[$_] = $maxLength }
-  #   }
-  # }
+  if ($AlignmentGroups) {
+    ConvertTo-TwoDimensionsArray ([ref] $AlignmentGroups)
+    $AlignmentGroups | ForEach-Object {
+      # Get the group of nodes to align
+      $group = $_
+
+      # Get the maximum depth
+      $maxDepth = ($_ | ForEach-Object { $_.Depth } | Measure-Object -Maximum).Maximum
+
+      # Arrange in a two-dimension array the columns length of the nodes in the group
+      $groupColumnsLength = @()
+      $group | ForEach-Object {
+        $groupColumnsLength += ,($_.Columns | ForEach-Object { $_.TextLength })
+      }
+
+      # Compute the columns length and assign it to the nodes in the group
+      $groupColumnsLength = @(Get-MaxArray $groupColumnsLength)
+      $_ | ForEach-Object {
+        $cols = $_.Columns
+        for ($i = 0; $i -lt [Math]::Min($groupColumnsLength.Count, $cols.Count); $i++) {
+          $cols[$i].ColumnLength = $groupColumnsLength[$i]
+        }
+      }
+
+      # Fix the first column length to adjust for the prefix
+      $_ | Where-Object { $_.Depth -lt $maxDepth } | ForEach-Object {
+        $depthDelta = $maxDepth - $_.Depth
+        $_.Columns[0].ColumnLength += ($depthDelta * 3)
+      }
+    }
+  }
 
   # Format the tree
   $Root.FormatChildren($SpacesBetweenColumns)

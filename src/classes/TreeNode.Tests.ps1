@@ -163,6 +163,7 @@ InModuleScope Hospitable {
     }
   }
 
+
   Describe 'TreeNode.FormatChildren' {
     It 'Recursively format children' {
       $node = New-Tree
