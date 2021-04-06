@@ -8,16 +8,20 @@ function Get-Tree {
 
   .PARAMETER SpacesBetweenColumns
   The number of spaces to use to seperate columns in a node.
+
+  .PARAMETER AlignmentGroups
+  The nodes to align together.
   #>
 
   # TODO: Document the prefixes
 
   param (
-    [Object] $Root,
-    [String] $TreenInPrefix = (Get-SettingValue 'TREE_IN_PREFIX' '│  '),
-    [String] $TreeBranchPrefix = (Get-SettingValue 'TREE_BRANCH_PREFIX' '├─ '),
-    [String] $TreeLeafPrefix = (Get-SettingValue 'TREE_BRANCH_PREFIX' '└─ '),
-    [int] $SpacesBetweenColumns = 1
+    [object] $Root,
+    [string] $TreenInPrefix = (Get-SettingValue 'TREE_IN_PREFIX' '│  '),
+    [string] $TreeBranchPrefix = (Get-SettingValue 'TREE_BRANCH_PREFIX' '├─ '),
+    [string] $TreeLeafPrefix = (Get-SettingValue 'TREE_BRANCH_PREFIX' '└─ '),
+    [int] $SpacesBetweenColumns = 1,
+    [array] $AlignmentGroups
   )
 
   # Recursive function for formatting a tree node
@@ -103,12 +107,22 @@ function Get-Tree {
     }
   }
 
-  # Format the tree
+  # Compute the max length array for each parent
   $columnsMaxLengthPerParent = @{}
   [TreeNode]::ComputeColumnsMaxLengthPerParent($columnsMaxLengthPerParent, $Root)
-  # if ($PadColumnsCrossDepth) {
-  #   Join-ColumnsMaxLengthCrossDepth -ColumnsMaxLengthPerDepth $columnsMaxLengthPerDepth -IndentationLength $TreenInPrefix.Length
-  # }
+
+  # Handle alignment groups
+  if ($AlignmentGroups) {
+    ConvertTo-TwoDimensionsArray ([ref] $AlignmentGroups)
+    $AlignmentGroups | ForEach-Object {
+      $lengthPerAlignmentGroup = $_ | ForEach-Object { ,$columnsMaxLengthPerParent[$_] }
+      ConvertTo-TwoDimensionsArray ([ref] $lengthPerAlignmentGroup)
+      $maxLength = [TreeNode]::GetMaxList($lengthPerAlignmentGroup)
+      $_ | ForEach-Object { $columnsMaxLengthPerParent[$_] = $maxLength }
+    }
+  }
+
+  # Format the tree
   $Root.FormatChildren($SpacesBetweenColumns, $columnsMaxLengthPerParent)
-  Format-TreeChildren -Children $Root.Children -Indent "" -Root $true
+  Format-TreeChildren -Children $Root.Children -Indent '' -Root $true
 }

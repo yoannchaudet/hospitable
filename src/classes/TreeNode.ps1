@@ -98,16 +98,14 @@ class TreeNode {
 
   # Return the max array from an array of array (of potentially different lengths)
   hidden static [int[]] GetMaxList([int[][]] $List) {
+    # Make sure the list has two dimensions
+    ConvertTo-TwoDimensionsArray ([ref] $List)
+
     # Init a max array
     $max = @()
 
     # Iterate over the first level of the array
     $List | ForEach-Object {
-      # Discard bad data
-      if (-Not $_) {
-        return
-      }
-
       # Get number of elements in current array
       $count = $_.Count
 

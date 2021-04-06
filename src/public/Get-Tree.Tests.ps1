@@ -92,5 +92,41 @@ root
 └─ 1           2  3
 "@
     }
+
+    It 'Formats tree with alignment groups' {
+      # Create a tree
+      $tree = New-Tree
+      $node1 = $tree.AddChild('French')
+      $node2 = $tree.AddChild('Spanish')
+      $bonjour = $node1.AddChild(('bonjour', 'hello'))
+      $hola = $node2.AddChild(('hola', 'hello'))
+
+      # Regular formatting
+      $out = @(Get-Tree $tree) -Join [Environment]::NewLine
+      $out | Should -Be @"
+French
+└─ bonjour hello
+Spanish
+└─ hola hello
+"@
+
+      # With alignment groups
+      $out = @(Get-Tree $tree -AlignmentGroups ($bonjour, $hola)) -Join [Environment]::NewLine
+      $out | Should -Be @"
+French
+└─ bonjour hello
+Spanish
+└─ hola    hello
+"@
+
+      # With proper alignment groups
+      $out = @(Get-Tree $tree -AlignmentGroups (,($node1, $node2))) -Join [Environment]::NewLine
+      $out | Should -Be @"
+French
+└─ bonjour hello
+Spanish
+└─ hola    hello
+"@
+    }
   }
 }
