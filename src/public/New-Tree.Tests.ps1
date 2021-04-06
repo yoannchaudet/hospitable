@@ -9,6 +9,7 @@ InModuleScope Hospitable {
       $node.Label | Should -Be ''
       $node.Columns.Count | Should -Be 0
       $node.Children.Count | Should -Be 0
+      $node.Depth | Should -Be 0
     }
   }
 }

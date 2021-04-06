@@ -17,7 +17,7 @@ function Get-Tree {
 
   param (
     [object] $Root,
-    [string] $TreenInPrefix = (Get-SettingValue 'TREE_IN_PREFIX' '│  '),
+    [string] $TreeInPrefix = (Get-SettingValue 'TREE_IN_PREFIX' '│  '),
     [string] $TreeBranchPrefix = (Get-SettingValue 'TREE_BRANCH_PREFIX' '├─ '),
     [string] $TreeLeafPrefix = (Get-SettingValue 'TREE_BRANCH_PREFIX' '└─ '),
     [int] $SpacesBetweenColumns = 1,
@@ -44,9 +44,9 @@ function Get-Tree {
     # Recursively increment the indentation
     if (!$Root) {
       if ($Last) {
-        $Indent += (" " * $TreenInPrefix.Length)
+        $Indent += (" " * $TreeInPrefix.Length)
       } else {
-        $Indent += $TreenInPrefix
+        $Indent += $TreeInPrefix
       }
     }
 

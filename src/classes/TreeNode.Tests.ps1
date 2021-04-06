@@ -57,6 +57,12 @@ InModuleScope Hospitable {
       $child.Columns.Count | Should -Be 3
     }
 
+    It 'Increases depth' {
+      $node = (New-Tree).AddChild('1')
+      $node.Depth | Should -Be 1
+      ($node.AddChild('2')).Depth | Should -Be 2
+    }
+
     It 'Inherits parent alignments' {
       $node = (New-Tree).AddChild(@('test'))
       $node.SetColumnAlignment(0, 'Right')

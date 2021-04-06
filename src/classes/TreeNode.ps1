@@ -30,6 +30,9 @@ class TreeNode {
   # List of children for this node
   hidden [System.Collections.Generic.List[TreeNode]] $Children
 
+  # Depth at which the tree node lives
+  hidden [int] $Depth
+
   ###
   ### Constructor
   ###
@@ -70,7 +73,10 @@ class TreeNode {
       $child.SetColumnAlignment($i, $this.Columns[$i].Alignment)
     }
 
-    # Ad the child node and return it
+    # Set depth
+    $child.Depth = $this.Depth + 1
+
+    # Add the child node and return it
     $this.Children.Add($child)
     return $child
   }
