@@ -80,8 +80,8 @@ InModuleScope Hospitable {
     It 'Supports valid text formatting' {
       Get-FormattedStringLength (Get-Bold 'hello') | Should -Be 5
       Get-FormattedStringLength ('hello 🤠' | Get-Bold | Get-Underline) | Should -Be 'hello 🤠'.Length
-      Get-FormattedStringLength ("  `nline 1`nlines 2 " | Get-Bold | Get-Underline | Get-Negative) | Should -Be "  `nline 1`nlines 2 ".Length
-      Get-FormattedStringLength @('a', (Get-Bold 'b'), (Get-Negative 'c'), (Get-Underline 'd')) -Join ' ' | Should -Be 7
+      Get-FormattedStringLength ("  `nline 1`nlines 2 " | Get-Bold | Get-Underline | Get-Negative | Get-StrikeThrough) | Should -Be "  `nline 1`nlines 2 ".Length
+      Get-FormattedStringLength @('a', (Get-Bold 'b'), (Get-Negative 'c'), (Get-Underline 'd'), (Get-StrikeThrough 'e')) -Join ' ' | Should -Be 9
     }
   }
 }
