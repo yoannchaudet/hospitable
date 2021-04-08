@@ -52,6 +52,18 @@ InModuleScope Hospitable {
     }
   }
 
+  Describe 'Get-StrikeThrough' {
+    It 'Ignores null or empty strings' {
+      Get-StrikeThrough -Value $null | Should -BeNullOrEmpty
+      Get-StrikeThrough -Value '' | Should -BeNullOrEmpty
+      Get-StrikeThrough | Should -BeNullOrEmpty
+    }
+
+    It 'Formats text' {
+      Get-StrikeThrough 'strikethrough' | Should -Be "$($script:ESC)$($script:TEXT_STRIKETHROUGH)strikethrough$($script:ESC)$($script:TEXT_NO_STRIKETHROUGH)"
+    }
+  }
+
   Describe 'Get-FormattedStringLength' {
     It 'Supports null and empty strings' {
       Get-FormattedStringLength | Should -Be 0
