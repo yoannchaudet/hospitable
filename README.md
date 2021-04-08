@@ -1,16 +1,9 @@
-<!-- PROJECT LOGO
-     https://www.patorjk.com/software/taag/#p=display&f=Standard&t=hospitable
--->
-<!-- markdownlint-disable MD040 -->
-<!-- markdownlint-disable MD041 -->
-```
- _                     _ _        _     _
-| |__   ___  ___ _ __ (_) |_ __ _| |__ | | ___
-| '_ \ / _ \/ __| '_ \| | __/ _` | '_ \| |/ _ \
-| | | | (_) \__ \ |_) | | || (_| | |_) | |  __/
-|_| |_|\___/|___/ .__/|_|\__\__,_|_.__/|_|\___|
-                |_|
-```
+<!-- PROJECT LOGO -->
+<p align="center">
+  <a href="https://github.com/yoannchaudet/hospitable">
+    <img src="images/hospitable.png" alt="Hospitable logo" width="640" />
+  </a>
+</p>
 
 ## Table of Contents
 
@@ -146,8 +139,6 @@ WIP: This looks very weird. Let's fix it. The way we do alignment is coming from
 Distributed under the MIT License. See [`LICENSE`](./LICENSE) for more information.
 
 ## Attributions
-
-- www.patorjk.com for the sweet ASCII logo
 
 <!-- CONTACT -->
 ## Contact
