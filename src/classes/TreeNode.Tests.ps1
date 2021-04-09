@@ -148,9 +148,9 @@ InModuleScope Hospitable {
       # Create a tree
       $tree = New-Tree
       $a = $tree.AddChild('a')
-      $a.AddChild(('b', 'bb'))
+      $a.AddChild(@('b', 'bb'))
       $a.AddChild('bbb')
-      $a.AddChild(('b', 'bb', 'bbbb'))
+      $a.AddChild(@('b', 'bb', 'bbbb'))
       $tree.ComputeDefaultColumnsLength()
 
       $a.Columns[0].ColumnLength | Should -Be 1

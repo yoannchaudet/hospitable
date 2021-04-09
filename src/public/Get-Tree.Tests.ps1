@@ -4,6 +4,29 @@ Import-Module (Join-Path $PSScriptRoot '../Hospitable.psm1')
 
 InModuleScope Hospitable {
   Describe 'Get-Tree' {
+    It 'Throws when an invalid root is passed' {
+      { Get-Tree 'test' } | Should -Throw 'Root is invalid'
+    }
+
+    It 'Throws when prefixes are not provided or of different lengths' {
+      $badPrefixes = @(
+        @('a', 'b', 'cc'),
+        @('a', 'bb', 'c'),
+        @('aa', 'b', 'c'),
+        @($null, 'b', 'c'),
+        @('a', $null, 'c'),
+        @('a', 'b', $null),
+        @($null, $null, $null)
+      )
+      $badPrefixes | ForEach-Object {
+        { Get-Tree (New-Tree) `
+            -TreeInPrefix $_[0] `
+            -TreeBranchPrefix $_[1] `
+            -TreeLeafPrefix $_[2]
+        } | Should -Throw 'Prefixes are either not all provided or of different lengths'
+      }
+    }
+
     It 'Formats one-node tree' {
       # Create a tree
       $tree = New-Tree
@@ -93,59 +116,44 @@ root
 "@
     }
 
-    It 'Formats tree with alignment groups (same depth)' {
+    It 'Formats tree with alignment groups' {
       # Create a tree
       $tree = New-Tree
-      $node1 = $tree.AddChild('French')
-      $node2 = $tree.AddChild('Spanish')
-      $bonjour = $node1.AddChild(('bonjour', 'hello'))
-      $hola = $node2.AddChild(('hola', 'hello'))
+      $n1 = $tree.AddChild(@('a', 'b', 'c'))
+      $n2 = $n1.AddChild(@('aa', 'bb', 'cc'))
+      $n3 = $n2.AddChild(@('aaa', 'bbb', 'ccc'))
 
       # Regular formatting
       $out = @(Get-Tree $tree) -Join [Environment]::NewLine
       $out | Should -Be @"
-French
-└─ bonjour hello
-Spanish
-└─ hola hello
-"@
-
-#       # With alignment groups
-#       $out = @(Get-Tree $tree -AlignmentGroups ($bonjour, $hola)) -Join [Environment]::NewLine
-#       $out | Should -Be @"
-# French
-# └─ bonjour hello
-# Spanish
-# └─ hola    hello
-# "@
-
-#       # With proper alignment groups
-#       $out = @(Get-Tree $tree -AlignmentGroups (,($node1, $node2))) -Join [Environment]::NewLine
-#       $out | Should -Be @"
-# French
-# └─ bonjour hello
-# Spanish
-# └─ hola    hello
-# "@
-    }
-
-    It 'Formats tree with alignment groups (different depth)' {
-      # Create a tree
-      $tree = New-Tree
-      $node1 = $tree.AddChild('French')
-      $node2 = $tree.AddChild(('hola', 'hello'))
-      $bonjour = $node1.AddChild(('bonjour', 'hello'))
-
-      # Regular formatting ('hola' is padded to match 'French')
-      $out = @(Get-Tree $tree) -Join [Environment]::NewLine
-      $out | Should -Be @"
-French
-└─ bonjour hello
-hola   hello
+a b c
+└─ aa bb cc
+   └─ aaa bbb ccc
 "@
 
       # With alignment groups
+      $out = @(Get-Tree $tree -AlignmentGroups @(, @($n1, $n2, $n3))) -Join [Environment]::NewLine
+      $out | Should -Be @"
+a         b   c
+└─ aa     bb  cc
+   └─ aaa bbb ccc
+"@
 
+      # With multiple alignment groups
+      $out = @(Get-Tree $tree -AlignmentGroups @($n2),@($n1, $n3)) -Join [Environment]::NewLine
+      $out | Should -Be @"
+a         b   c
+└─ aa bb cc
+   └─ aaa bbb ccc
+"@
+
+      # With multiple alignment groups
+      $out = @(Get-Tree $tree -AlignmentGroups @(),$null,@($n2,'test'),@(0, $n1, $false, $n3)) -Join [Environment]::NewLine
+      $out | Should -Be @"
+a         b   c
+└─ aa bb cc
+   └─ aaa bbb ccc
+"@
     }
   }
 }

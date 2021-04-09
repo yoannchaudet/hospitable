@@ -76,7 +76,7 @@ Format a list (of lists).
 
 ```powershell
 # A 3-element list including a nested list
-Get-Lists 'item 1', ('sub group item 1', 'sub group item 2'), 'item 3'
+Get-Lists 'item 1', @('sub group item 1', 'sub group item 2'), 'item 3'
 
 # With some formatting
 Get-Lists ('item 1' | Get-Underline), ('item 2' | Get-Underline)
@@ -96,11 +96,11 @@ Format a tree.
 # AddChild returns the child tree node
 $tree = New-Tree
 $fruits = $tree.AddChild('Fruits')
-('🥝 Kiwi', '🥭 Mango', '🍌 Banana') | ForEach-Object {
+'🥝 Kiwi', '🥭 Mango', '🍌 Banana' | ForEach-Object {
   $fruits.AddChild($_)
 } | Out-Null
 $vegetables = $tree.AddChild('Vegetables')
-('🥕 Carrot', '🥔 Potato') | ForEach-Object {
+'🥕 Carrot', '🥔 Potato' | ForEach-Object {
   $vegetables.AddChild($_)
 } | Out-Null
 
@@ -129,13 +129,13 @@ $tree = New-Tree '2021-03-25'
 $tree.SetColumnAlignment(2, 'Right')
 $stock = $tree.AddChild('Stock')
 # Add nodes using 3 columns and text formatting
-$itot = $stock.AddChild(((Get-Bold 'ITOT'), 'iShares Core S&P Total US Stock Market ETF', (Get-Negative '$89.93')))
-$ixus = $stock.AddChild(((Get-Bold 'IXUS'), 'iShares Core MSCI Total International Stock ETF', (Get-Negative '$69.50')))
+$itot = $stock.AddChild(@((Get-Bold 'ITOT'), 'iShares Core S&P Total US Stock Market ETF', (Get-Negative '$89.93')))
+$ixus = $stock.AddChild(@((Get-Bold 'IXUS'), 'iShares Core MSCI Total International Stock ETF', (Get-Negative '$69.50')))
 $crypto = $tree.AddChild('Crypto')
 $btc = $crypto.AddChild('Bitcoin')
-$gbtc = $btc.AddChild(((Get-Bold 'GBTC'), 'Grayscale Bitcoin Trust (Btc)', (Get-Negative '$44.54')))
+$gbtc = $btc.AddChild(@((Get-Bold 'GBTC'), 'Grayscale Bitcoin Trust (Btc)', (Get-Negative '$44.54')))
 # Replace the default alignment (left) for the first column (0-indexed) of the three three-column nodes
-($itot, $ixus, $gbtc) | ForEach-Object {
+$itot, $ixus, $gbtc | ForEach-Object {
   $_.SetColumnAlignment(0, 'Right')
 }
 
@@ -151,11 +151,8 @@ In order to pad together the leave-nodes they can be put together in an alignmen
 
 ```powershell
 # Render the tree with one alignment group
-Get-Tree $tree -AlignmentGroups $itot, $ixus, $gbtc
-
-# Note, AlignmentGroups is expected to be a two-dimension array
-# as such a more accurate (but equivalent) syntax would be:
-# Get-Tree $tree -AlignmentGroups (,($itot, $ixus, $gbtc))
+# Note the syntax here which is required to pass a two-dimension array containing a single array (group)
+Get-Tree $tree -AlignmentGroups @(,@($itot, $ixus, $gbtc))
 ```
 
 ![Get-Tree (complex with alignment groups)](./images/get-tree3.png)

@@ -29,7 +29,7 @@ InModuleScope Hospitable {
 └─ b
  ─ c
 "@
-      (Get-Lists (,@('a', 'b', 'c'))) -Join [Environment]::NewLine | Should -Be @"
+      (Get-Lists @(,@('a', 'b', 'c'))) -Join [Environment]::NewLine | Should -Be @"
 ┌─ a
 ├─ b
 └─ c
@@ -37,7 +37,7 @@ InModuleScope Hospitable {
     }
 
     It 'Ignore empty nested lists' {
-      (Get-Lists (@(),@('a', 'b', 'c'), 'd', @(), @('e'))) -Join [Environment]::NewLine | Should -Be @"
+      (Get-Lists @(@(),@('a', 'b', 'c'), 'd', @(), @('e'))) -Join [Environment]::NewLine | Should -Be @"
 ┌─ a
 ├─ b
 └─ c

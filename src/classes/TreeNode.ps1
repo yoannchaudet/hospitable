@@ -121,7 +121,7 @@ class TreeNode {
     # Arrange in a two-dimension array the columns length of the direct children
     $childrenColumnsLength = @()
     $this.Children | ForEach-Object {
-      $childrenColumnsLength += ,($_.Columns | ForEach-Object { $_.TextLength })
+      $childrenColumnsLength += ,@($_.Columns | ForEach-Object { $_.TextLength })
     }
 
     # Compute the default columns length and assign it to the children
