@@ -1,4 +1,5 @@
 <!-- PROJECT LOGO -->
+<!-- markdownlint-disable MD033 MD041 -->
 <p align="center">
   <a href="https://github.com/yoannchaudet/hospitable">
     <img src="images/hospitable.png" alt="Hospitable logo" width="640" />
@@ -92,6 +93,7 @@ Format a tree.
 #
 # Build a tree
 #
+
 # Note the Out-Null not to pollute the output since
 # AddChild returns the child tree node
 $tree = New-Tree
@@ -124,6 +126,7 @@ More complex scenarios are also supported:
 #
 # Build a tree
 #
+
 $tree = New-Tree '2021-03-25'
 # Set the third column (0-indexed) of all nodes to be right aligned
 $tree.SetColumnAlignment(2, 'Right')
@@ -161,21 +164,12 @@ Get-Tree $tree -AlignmentGroups @(,@($itot, $ixus, $gbtc))
 
 Distributed under the MIT License. See [`LICENSE`](./LICENSE) for more information.
 
-<!-- CONTACT -->
 ## Contact
 
-Project link: https://github.com/yoannchaudet/hospitable.
+[Project link][hospitable-at-github]
 
-<!-- ACKNOWLEDGEMENTS
-## Acknowledgements
-
-* []()
-* []()
-* []()
--->
-
-<!-- MARKDOWN LINKS & IMAGES -->
-<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
+<!-- MARKDOWN LINKS -->
+[hospitable-at-github]: https://github.com/yoannchaudet/hospitable
 [advanced-functions]:https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_functions_advanced?view=powershell-7.1
 [cmdlets]:https://docs.microsoft.com/en-us/powershell/scripting/developer/cmdlet/cmdlet-overview?view=powershell-7.1
 [pester]: https://pester.dev/
