@@ -86,10 +86,22 @@ function Get-Tree {
       # Get the maximum depth
       $maxDepth = ($_ | ForEach-Object { $_.Depth } | Measure-Object -Maximum).Maximum
 
+      # Get the prefix length
+      # TODO: add validation to make sure the three prefixes have the same length
+      $prefixLength = $TreeInPrefix.Length
+
       # Arrange in a two-dimension array the columns length of the nodes in the group
       $groupColumnsLength = @()
       $group | ForEach-Object {
-        $groupColumnsLength += ,($_.Columns | ForEach-Object { $_.TextLength })
+        $node = $_
+        $groupColumnsLength += ,((0..($node.Columns.Count - 1)) | ForEach-Object {
+          if (0 -eq $_) {
+            # Include the prefix length in the column length calculation
+            $node.Columns[$_].TextLength + ($node.Depth - 1) * $prefixLength
+          } else {
+            $node.Columns[$_].TextLength
+          }
+        })
       }
 
       # Compute the columns length and assign it to the nodes in the group
@@ -101,10 +113,9 @@ function Get-Tree {
         }
       }
 
-      # Fix the first column length to adjust for the prefix
-      $_ | Where-Object { $_.Depth -lt $maxDepth } | ForEach-Object {
-        $depthDelta = $maxDepth - $_.Depth
-        $_.Columns[0].ColumnLength += ($depthDelta * 3)
+      # Fix the first column length to adjust for the ßprefix
+      $_ | ForEach-Object {
+        $_.Columns[0].ColumnLength -= ($_.Depth - 1) * $prefixLength
       }
     }
   }

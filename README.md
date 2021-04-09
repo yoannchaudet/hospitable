@@ -16,14 +16,13 @@
   - [Get-Lists](#get-lists)
   - [Get-Tree](#get-tree)
 - [License](#license)
-- [Attributions](#attributions)
 - [Contact](#contact)
 
 ## About The Project
 
-A good host is said to be *hospitable*, as such this project contains a set of PowerShell [cmdlets][cmdlets] (in the form of [advanced functions][advanced-functions]) for printing stuff on terminal/console.
+A good host is said to be *hospitable*. I like bad puns so this project which contains a set of PowerShell [cmdlets][cmdlets] (in the form of [advanced functions][advanced-functions]) for printing stuff on terminal/console is perfectly named.
 
-This project supports PowerShell 7+ and is compatible with Windows 10+, with MacOS and Linux. Because most pretty outputs rely on [virtual terminal sequences (based on VT-100)][vt-100], older versions of Windows are not supported.
+This project supports PowerShell 7+ and is compatible with Windows 10+, MacOS and Linux. Because most pretty outputs rely on [virtual terminal sequences (based on VT-100)][vt-100], older versions of Windows are not supported.
 
 ## Built With
 
@@ -53,7 +52,7 @@ To run locally follow these steps:
 
 ### Text Formatting
 
-The three following formatting are supported:
+The following text formatting is supported:
 
 ```powershell
 # Bold, underline and negative formats
@@ -65,7 +64,7 @@ Get-Negative negative
 # See https://github.com/PowerShell/PowerShell/pull/14461
 Get-StrikeThrough strikethrough
 
-# They can be combined too in pipes
+# They can be combined too (e.g. using pipes)
 'hello there' | Get-Bold | Get-Underline
 ```
 
@@ -77,7 +76,7 @@ Format a list (of lists).
 
 ```powershell
 # A 3-element list including a nested list
-Get-Lists 'item 1', @('sub group item 1', 'sub group item 2'), 'item 3'
+Get-Lists 'item 1', ('sub group item 1', 'sub group item 2'), 'item 3'
 
 # With some formatting
 Get-Lists ('item 1' | Get-Underline), ('item 2' | Get-Underline)
@@ -90,59 +89,80 @@ Get-Lists ('item 1' | Get-Underline), ('item 2' | Get-Underline)
 Format a tree.
 
 ```powershell
+#
 # Build a tree
+#
+# Note the Out-Null not to pollute the output since
+# AddChild returns the child tree node
 $tree = New-Tree
 $fruits = $tree.AddChild('Fruits')
-@('🥝 Kiwi', '🥭 Mango', '🍌 Banana') | ForEach-Object {
-  # Add some children to the fruits root (Out-Null not to pollute stdout where each node would be printed when returned)
-  $fruits.AddChild($_) | Out-Null
-}
+('🥝 Kiwi', '🥭 Mango', '🍌 Banana') | ForEach-Object {
+  $fruits.AddChild($_)
+} | Out-Null
 $vegetables = $tree.AddChild('Vegetables')
-@('🥕 Carrot', '🥔 Potato') | ForEach-Object {
-  $vegetables.AddChild($_) | Out-Null
-}
+('🥕 Carrot', '🥔 Potato') | ForEach-Object {
+  $vegetables.AddChild($_)
+} | Out-Null
 
-# Get the tree
+# And render it
 Get-Tree $tree
 ```
 
-![Get-Tree multi-root with one-column nodes](./images/get-tree1.png)
+![Get-Tree (simple)](./images/get-tree1.png)
 
-In addition, the following complex formatting are supported:
+More complex scenarios are also supported:
 
-- A node may have multiple columns (i.e. space-separated strings)
-- Columns can be aligned (left, right, centered), the alignment is inherited from parent to children and can be overridden
-- Columns are padded to the longest column of nodes under a same parent, this behavior can be overridden with groups (WIP rename)
+1. A node may have multiple columns (i.e. space-separated strings)
+
+2. Columns can be aligned (left, right, centered),
+  the alignment is inherited from parent to children and can be overridden
+
+3. Columns are padded to the longest column of nodes under a same parent,
+  this behavior can be overridden with groups
 
 ```powershell
-# Build the tree
+#
+# Build a tree
+#
 $tree = New-Tree '2021-03-25'
+# Set the third column (0-indexed) of all nodes to be right aligned
 $tree.SetColumnAlignment(2, 'Right')
 $stock = $tree.AddChild('Stock')
-$itot = $stock.AddChild(@((Get-Bold 'ITOT'), 'iShares Core S&P Total US Stock Market ETF', (Get-Negative '$89.93')))
-$ixus = $stock.AddChild(@((Get-Bold 'IXUS'), 'iShares Core MSCI Total International Stock ETF', (Get-Negative '$69.50')))
+# Add nodes using 3 columns and text formatting
+$itot = $stock.AddChild(((Get-Bold 'ITOT'), 'iShares Core S&P Total US Stock Market ETF', (Get-Negative '$89.93')))
+$ixus = $stock.AddChild(((Get-Bold 'IXUS'), 'iShares Core MSCI Total International Stock ETF', (Get-Negative '$69.50')))
 $crypto = $tree.AddChild('Crypto')
 $btc = $crypto.AddChild('Bitcoin')
-$gbtc = $btc.AddChild(@((Get-Bold 'GBTC'), 'Grayscale Bitcoin Trust (Btc)', (Get-Negative '$44.54')))
-@($itot, $ixus, $gbtc) | ForEach-Object { $_.SetColumnAlignment(0, 'Right') }
+$gbtc = $btc.AddChild(((Get-Bold 'GBTC'), 'Grayscale Bitcoin Trust (Btc)', (Get-Negative '$44.54')))
+# Replace the default alignment (left) for the first column (0-indexed) of the three three-column nodes
+($itot, $ixus, $gbtc) | ForEach-Object {
+  $_.SetColumnAlignment(0, 'Right')
+}
 
-# Get the tree
+# Render the tree
 Get-Tree $tree
 ```
 
-WIP: This looks very weird. Let's fix it. The way we do alignment is coming from Souvenirs and it does not make much sense here. Proposal:
+![Get-Tree (complex with default padding)](./images/get-tree2.png)
 
-- always align nodes under a same parent (i.e. all children) - stop doing it for all nodes at the same depth (which is more complicated to compute...)
-- replace `New-Tree` by `New-Tree` (which will return an empty root so we don't have to do it in `Get-Tree`), adding children will be needed under the root
-- in Get-Tree add an option to pass a list of list of nodes to align together, e.g. `Get-Tree $tree -AlignmentGroups ,@($stock, $gbtc)`
+Notice the `ITOT` and `IXUS` nodes have their columns padded together (so the $ amounts on the right are aligned properly). This is a demonstration of the third scenario described above.
 
-🎉
+In order to pad together the leave-nodes they can be put together in an alignment group:
+
+```powershell
+# Render the tree with one alignment group
+Get-Tree $tree -AlignmentGroups $itot, $ixus, $gbtc
+
+# Note, AlignmentGroups is expected to be a two-dimension array
+# as such a more accurate (but equivalent) syntax would be:
+# Get-Tree $tree -AlignmentGroups (,($itot, $ixus, $gbtc))
+```
+
+![Get-Tree (complex with alignment groups)](./images/get-tree3.png)
 
 ## License
 
 Distributed under the MIT License. See [`LICENSE`](./LICENSE) for more information.
-
-## Attributions
 
 <!-- CONTACT -->
 ## Contact

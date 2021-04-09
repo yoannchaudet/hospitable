@@ -90,7 +90,7 @@ class TreeNode {
   }
 
   # Set column alignment for a given column
-  # Note: when alignment is set for a given node, children will inherit the same alignment by default unless overwritten
+  # Note: when alignment is set for a given node, children will inherit the same alignment by default unless overidden
   [void] SetColumnAlignment([int] $ColumnIndex, [ColumnAlignment] $Alignment) {
     # Ignore negative index
     if ($ColumnIndex -lt 0) {

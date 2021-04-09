@@ -9,9 +9,9 @@ InModuleScope Hospitable {
       $tree = New-Tree
       $root = $tree.AddChild('root')
       $node1 = $root.AddChild('node1')
-      $node1.AddChild('subnode 1') | Out-Null
-      $node1.AddChild('subnode 2') | Out-Null
-      $root.AddChild('node2' ) | Out-Null
+      $node1.AddChild('subnode 1')
+      $node1.AddChild('subnode 2')
+      $root.AddChild('node2' )
 
       # Verify it gets formatted fine
       $tree = @(Get-Tree $tree) -Join [Environment]::NewLine
@@ -28,9 +28,9 @@ root
       # Create a tree
       $tree = New-Tree
       $node0 = $tree.AddChild('node 0')
-      $node0.AddChild('subnode 1') | Out-Null
-      $node0.AddChild('subnode 2') | Out-Null
-      $tree.AddChild('node 1') | Out-Null
+      $node0.AddChild('subnode 1')
+      $node0.AddChild('subnode 2')
+      $tree.AddChild('node 1')
 
       # Verify we can format multiple parts of the tree as roots
       $tree = @(Get-Tree $tree) -Join [Environment]::NewLine
@@ -81,7 +81,7 @@ root
       $root.AddChild(@('col1', 'col2', 'col3'))
       $root.AddChild('some text')
       $lastNode = $root.AddChild(@('1', '2', '3'))
-      $lastNode.SetColumnAlignment(0, 'Left') # test overwrite
+      $lastNode.SetColumnAlignment(0, 'Left') # test overwride
 
       # Verify it gets formatted fine
       $tree = @(Get-Tree $tree) -Join [Environment]::NewLine
