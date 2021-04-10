@@ -13,18 +13,20 @@ function Get-Tree {
   The nodes to align together as a two-dimension array. Note: invalid values are silently ignored.
   #>
 
-  # TODO: Document the prefixes
-
   param (
     [Parameter(Mandatory)]
     [object] $Root,
-    [string] $TreeInPrefix = (Get-SettingValue 'TREE_IN_PREFIX' '│  '),
-    [string] $TreeBranchPrefix = (Get-SettingValue 'TREE_BRANCH_PREFIX' '├─ '),
-    [string] $TreeLeafPrefix = (Get-SettingValue 'TREE_BRANCH_PREFIX' '└─ '),
-    [ValidateRange(0, 42)]
-    [int] $SpacesBetweenColumns = 1,
     [object[][]] $AlignmentGroups
   )
+
+  # Get settings
+  $treeInPrefix = Get-SettingValue 'TREE_IN_PREFIX' '│  '
+  $treeBranchPrefix = Get-SettingValue 'TREE_BRANCH_PREFIX' '├─ '
+  $treeLeafPrefix = Get-SettingValue 'TREE_LEAF_PREFIX' '└─ '
+  $spacesBetweenColumns = [int] (Get-SettingValue 'TREE_SPACES_BETWEEN_COLUMNS' 1)
+  if ($spacesBetweenColumns -le 0) {
+    $spacesBetweenColumns = 0
+  }
 
   # Recursive function for formatting a tree node
   function Format-TreeNode {
@@ -39,16 +41,16 @@ function Get-Tree {
     $outputPrefix = ""
     if (!$Root) {
       $outputPrefix += $Indent
-      $outputPrefix += ($Last ? $TreeLeafPrefix : $TreeBranchPrefix)
+      $outputPrefix += ($Last ? $treeLeafPrefix : $treeBranchPrefix)
     }
     "${outputPrefix}$($Node.Label)"
 
     # Recursively increment the indentation
     if (!$Root) {
       if ($Last) {
-        $Indent += (" " * $TreeInPrefix.Length)
+        $Indent += (" " * $treeInPrefix.Length)
       } else {
-        $Indent += $TreeInPrefix
+        $Indent += $treeInPrefix
       }
     }
 
@@ -80,9 +82,9 @@ function Get-Tree {
   }
 
   # Validate the prefixes are all of the same length
-  $prefixesSameLength = $TreeInPrefix -and $TreeBranchPrefix -and $TreeLeafPrefix
-  $prefixesSameLength = $prefixesSameLength -and $TreeInPrefix.Length -eq $TreeBranchPrefix.Length
-  $prefixesSameLength = $prefixesSameLength -and $TreeBranchPrefix.Length -eq $TreeLeafPrefix.Length
+  $prefixesSameLength = $treeInPrefix -and $treeBranchPrefix -and $treeLeafPrefix
+  $prefixesSameLength = $prefixesSameLength -and $treeInPrefix.Length -eq $treeBranchPrefix.Length
+  $prefixesSameLength = $prefixesSameLength -and $treeBranchPrefix.Length -eq $treeLeafPrefix.Length
   if (-not $prefixesSameLength) {
     throw 'Prefixes are either not all provided or of different lengths'
   }
@@ -96,7 +98,7 @@ function Get-Tree {
     $group = @($_ | Where-Object { $_ -is [TreeNode] })
 
     # Get the prefix length
-    $prefixLength = $TreeInPrefix.Length
+    $prefixLength = $treeInPrefix.Length
 
     # Arrange in a two-dimension array the columns length of the nodes in the group
     $groupColumnsLength = @()
@@ -128,6 +130,6 @@ function Get-Tree {
   }
 
   # Format the tree
-  $Root.FormatChildren($SpacesBetweenColumns)
+  $Root.FormatChildren($spacesBetweenColumns)
   Format-TreeChildren -Children $Root.Children -Indent '' -Root $true
 }

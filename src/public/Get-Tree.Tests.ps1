@@ -8,22 +8,25 @@ InModuleScope Hospitable {
       { Get-Tree 'test' } | Should -Throw 'Root is invalid'
     }
 
-    It 'Throws when prefixes are not provided or of different lengths' {
-      $badPrefixes = @(
-        @('a', 'b', 'cc'),
-        @('a', 'bb', 'c'),
-        @('aa', 'b', 'c'),
-        @($null, 'b', 'c'),
-        @('a', $null, 'c'),
-        @('a', 'b', $null),
-        @($null, $null, $null)
-      )
-      $badPrefixes | ForEach-Object {
-        { Get-Tree (New-Tree) `
-            -TreeInPrefix $_[0] `
-            -TreeBranchPrefix $_[1] `
-            -TreeLeafPrefix $_[2]
-        } | Should -Throw 'Prefixes are either not all provided or of different lengths'
+    It 'Throws when prefixes are of different lengths' {
+      try {
+        $badPrefixes = @(
+          @('a', 'b', 'cc'),
+          @('a', 'bb', 'c'),
+          @('aa', 'b', 'c')
+        )
+        $badPrefixes | ForEach-Object {
+          {
+            $global:HOSPITABLE_TREE_IN_PREFIX = $_[0]
+            $global:HOSPITABLE_TREE_BRANCH_PREFIX = $_[1]
+            $global:HOSPITABLE_TREE_LEAF_PREFIX = $_[2]
+            Get-Tree (New-Tree)
+          } | Should -Throw 'Prefixes are either not all provided or of different lengths'
+        }
+      } finally {
+        Remove-Variable -Name HOSPITABLE_TREE_IN_PREFIX -Scope 'Global' -Force
+        Remove-Variable -Name HOSPITABLE_TREE_BRANCH_PREFIX -Scope 'Global' -Force
+        Remove-Variable -Name HOSPITABLE_TREE_LEAF_PREFIX -Scope 'Global' -Force
       }
     }
 
@@ -72,11 +75,16 @@ node 1
       $tree.AddChild(@('col3', 'col4'))
 
       # Verify it gets formatted fine
-      $tree = @(Get-Tree $tree -SpacesBetweenColumns 3) -Join [Environment]::NewLine
-      $tree | Should -Be @"
+      try {
+        $global:HOSPITABLE_TREE_SPACES_BETWEEN_COLUMNS = 3
+        $tree = @(Get-Tree $tree) -Join [Environment]::NewLine
+        $tree | Should -Be @"
 col1   col2
 col3   col4
 "@
+      } finally {
+        Remove-Variable HOSPITABLE_TREE_SPACES_BETWEEN_COLUMNS -Scope 'global' -Force
+      }
     }
 
     It 'Formats trees with columns' {

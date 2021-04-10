@@ -14,7 +14,7 @@ function Get-Lists {
     [object[]] $Lists
   )
 
-  # Get prefixes
+  # Get settings
   $listFirstPrefix = Get-SettingValue 'LIST_FIRST_PREFIX' '┌─ '
   $listNPrefix = Get-SettingValue 'LIST_N_PREFIX' '├─ '
   $listLastPrefix = Get-SettingValue 'LIST_LAST_PREFIX' '└─ '
