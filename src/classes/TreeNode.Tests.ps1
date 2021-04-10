@@ -30,6 +30,16 @@ InModuleScope Hospitable {
       $node.Columns[1].Alignment | Should -Be 'Default'
       $node.Children.Count | Should -Be 0
     }
+
+    It 'Sets depth' {
+      $node = [TreeNode]::New(@())
+      $node.Depth | Should -Be 0
+    }
+
+    It 'Sets alignment group' {
+      $node = [TreeNode]::New(@())
+      $node.AlignmentGroup | Should -Be 0
+    }
   }
 
   Describe 'TreeNode.AddChild' {
@@ -91,6 +101,12 @@ InModuleScope Hospitable {
       $child3.Columns[1].Alignment | Should -Be 'Centered'
       $child3.Columns[2].Alignment | Should -Be 'Default'
       $child3.Columns[3].Alignment | Should -Be 'Right'
+    }
+
+    It 'Inherits alignment group' {
+      $node = New-Tree
+      $node.AlignmentGroup = 1
+      $node.AddChild('test').AlignmentGroup | Should -Be 1
     }
   }
 

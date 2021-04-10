@@ -41,6 +41,9 @@ class TreeNode {
   # Depth at which the tree node lives
   hidden [int] $Depth
 
+  # Alignment group for the tree node
+  hidden [int] $AlignmentGroup
+
   ###
   ### Constructor
   ###
@@ -80,6 +83,9 @@ class TreeNode {
     for ($i = 0; $i -lt [Math]::Min($Columns.Count, $this.Columns.Count); $i++) {
       $child.SetColumnAlignment($i, $this.Columns[$i].Alignment)
     }
+
+    # Inherit alignment group
+    $child.AlignmentGroup = $this.AlignmentGroup
 
     # Set depth
     $child.Depth = $this.Depth + 1
