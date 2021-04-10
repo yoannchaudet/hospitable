@@ -10,40 +10,34 @@ function Get-Lists {
   The formatted string.
   #>
 
-  # TODO: Document the prefixes
-
   param (
-    [object[]] $Lists,
-    [String] $ListFirstPrefix = (Get-SettingValue 'LIST_FIRST_PREFIX' '┌─ '),
-    [String] $ListNPrefix = (Get-SettingValue 'LIST_N_PREFIX' '├─ '),
-    [String] $ListLastPrefix = (Get-SettingValue 'LIST_LAST_PREFIX' '└─ '),
-    [String] $ListOneItemPrefix = (Get-SettingValue 'LIST_ONE_ITEM_PREFIX' ' ─ ')
+    [object[]] $Lists
   )
 
-  process {
-    # Iterate over the lists
-    $Lists | ForEach-Object {
-      # Ignore empty lists
-      if (-Not $_) {
-        return
+  # Get prefixes
+  $listFirstPrefix = Get-SettingValue 'LIST_FIRST_PREFIX' '┌─ '
+  $listNPrefix = Get-SettingValue 'LIST_N_PREFIX' '├─ '
+  $listLastPrefix = Get-SettingValue 'LIST_LAST_PREFIX' '└─ '
+  $listOneItemPrefix = Get-SettingValue 'LIST_ONE_ITEM_PREFIX' ' ─ '
+
+  # Iterate over the lists
+  $Lists | Where-Object { $_ } | ForEach-Object {
+
+    # Iterate over the list in the current list
+    $list = @($_)
+    for ($i = 0; $i -lt $list.Count; $i++) {
+      # Select the appropriate prefix
+      $prefix = $listNPrefix
+      if ($i -eq 0 -and $list.Count -eq 1) {
+        $prefix = $listOneItemPrefix
+      } elseif ($i -eq 0) {
+        $prefix = $listFirstPrefix
+      } elseif ($i -eq ($list.Count -1)) {
+        $prefix = $listLastPrefix
       }
 
-      # Iterate over the list in the current list
-      $list = @($_)
-      for ($i = 0; $i -lt $list.Count; $i++) {
-        # Select the appropriate prefix
-        $prefix = $ListNPrefix
-        if ($i -eq 0 -and $list.Count -eq 1) {
-          $prefix = $ListOneItemPrefix
-        } elseif ($i -eq 0) {
-          $prefix = $ListFirstPrefix
-        } elseif ($i -eq ($list.Count -1)) {
-          $prefix = $ListLastPrefix
-        }
-
-        # Output the element
-        "${prefix}$($list[$i])"
-      }
+      # Output the element
+      "${prefix}$($list[$i])"
     }
   }
 }
