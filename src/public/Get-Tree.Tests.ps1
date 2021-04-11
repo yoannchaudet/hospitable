@@ -99,8 +99,8 @@ root
       # Create a tree
       $tree = New-Tree
       $root = $tree.AddChild('root')
-      $root.SetColumnAlignment(0, 'Right')
-      $root.SetColumnAlignment(1, 'Centered')
+      $root.SetChildrenColumnAlignment(0, 'Right')
+      $root.SetChildrenColumnAlignment(1, 'Centered')
       $root.AddChild(@('col1', 'col2', 'col3'))
       $root.AddChild('some text')
       $lastNode = $root.AddChild(@('1', '2', '3'))
@@ -109,51 +109,36 @@ root
       # Verify it gets formatted fine
       $tree = @(Get-Tree $tree) -Join [Environment]::NewLine
       $tree | Should -Be @"
-        root
+root
 ├─      col1 col2 col3
 ├─ some text
 └─ 1           2  3
 "@
     }
 
-#     It 'Formats tree with alignment groups' {
-#       # Create a tree
-#       $tree = New-Tree
-#       $n1 = $tree.AddChild(@('a', 'b', 'c'))
-#       $n2 = $n1.AddChild(@('aa', 'bb', 'cc'))
-#       $n3 = $n2.AddChild(@('aaa', 'bbb', 'ccc'))
+    It 'Formats tree with alignment groups' {
+      # Create a tree
+      $tree = New-Tree
+      $n1 = $tree.AddChild(@('a', 'b', 'c'))
+      $n2 = $n1.AddChild(@('aa', 'bb', 'cc'))
+      $n2.AddChild(@('aaa', 'bbb', 'ccc'))
 
-#       # Regular formatting
-#       $out = @(Get-Tree $tree) -Join [Environment]::NewLine
-#       $out | Should -Be @"
-# a         b   c
-# └─ aa     bb  cc
-#    └─ aaa bbb ccc
-# "@
+      # Default padding (all nodes in the same group)
+      $out = @(Get-Tree $tree) -Join [Environment]::NewLine
+      $out | Should -Be @"
+a         b   c
+└─ aa     bb  cc
+   └─ aaa bbb ccc
+"@
 
-#       # With alignment groups
-#       $out = @(Get-Tree $tree -AlignmentGroups @(, @($n1, $n2, $n3))) -Join [Environment]::NewLine
-#       $out | Should -Be @"
-# a         b   c
-# └─ aa     bb  cc
-#    └─ aaa bbb ccc
-# "@
-
-#       # With multiple alignment groups
-#       $out = @(Get-Tree $tree -AlignmentGroups @($n2),@($n1, $n3)) -Join [Environment]::NewLine
-#       $out | Should -Be @"
-# a         b   c
-# └─ aa bb cc
-#    └─ aaa bbb ccc
-# "@
-
-#       # With multiple alignment groups
-#       $out = @(Get-Tree $tree -AlignmentGroups @(),$null,@($n2,'test'),@(0, $n1, $false, $n3)) -Join [Environment]::NewLine
-#       $out | Should -Be @"
-# a         b   c
-# └─ aa bb cc
-#    └─ aaa bbb ccc
-# "@
-#     }
+      # With multiple alignment groups
+      $n2.AlignmentGroup = 2
+      $out = @(Get-Tree $tree) -Join [Environment]::NewLine
+      $out | Should -Be @"
+a         b   c
+└─ aa bb cc
+   └─ aaa bbb ccc
+"@
+    }
   }
 }

@@ -8,9 +8,6 @@ function Get-Tree {
 
   .PARAMETER SpacesBetweenColumns
   The number of spaces to use to seperate columns in a node.
-
-  .PARAMETER AlignmentGroups
-  The nodes to align together as a two-dimension array. Note: invalid values are silently ignored.
   #>
 
   # TODO: Document the prefixes
@@ -22,8 +19,7 @@ function Get-Tree {
     [string] $TreeBranchPrefix = (Get-SettingValue 'TREE_BRANCH_PREFIX' '├─ '),
     [string] $TreeLeafPrefix = (Get-SettingValue 'TREE_BRANCH_PREFIX' '└─ '),
     [ValidateRange(0, 42)]
-    [int] $SpacesBetweenColumns = 1,
-    [object[][]] $AlignmentGroups
+    [int] $SpacesBetweenColumns = 1
   )
 
   # Recursive function for formatting a tree node

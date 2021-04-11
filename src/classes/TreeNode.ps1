@@ -18,6 +18,9 @@ class TreeNodeColumn {
   # Column alignment
   [ColumnAlignment] $Alignment
 
+  # Children column alignment
+  [ColumnAlignment] $ChildrenAlignment
+
   # Column length (which may include padding)
   [int] $ColumnLength
 }
@@ -43,6 +46,9 @@ class TreeNode {
   # Alignment group for the tree node
   hidden [int] $AlignmentGroup
 
+  # Alignment group for the children
+  hidden [int] $ChildrenAlignmentGroup
+
   ###
   ### Constructor
   ###
@@ -57,6 +63,7 @@ class TreeNode {
         Text = $trimmedText
         TextLength = Get-FormattedStringLength $trimmedText
         Alignment = [ColumnAlignment]::Left
+        ChildrenAlignment = [ColumnAlignment]::Left
       }
     })
     $this.Label = ''
@@ -80,11 +87,11 @@ class TreeNode {
 
     # Inherit the column alignment from the parent
     for ($i = 0; $i -lt [Math]::Min($Columns.Count, $this.Columns.Count); $i++) {
-      $child.SetColumnAlignment($i, $this.Columns[$i].Alignment)
+      $child.SetColumnAlignment($i, $this.Columns[$i].ChildrenAlignment)
     }
 
     # Inherit alignment group
-    $child.AlignmentGroup = $this.AlignmentGroup
+    $child.AlignmentGroup = $this.ChildrenAlignmentGroup
 
     # Set depth
     $child.Depth = $this.Depth + 1
@@ -94,25 +101,41 @@ class TreeNode {
     return $child
   }
 
-  # Set column alignment for a given column
-  # Note: when alignment is set for a given node, children will inherit the same alignment by default unless overidden
-  [void] SetColumnAlignment([int] $ColumnIndex, [ColumnAlignment] $Alignment) {
-    # Ignore negative index
-    if ($ColumnIndex -lt 0) {
-      return
-    }
-
+  # Create a column if needed for a given index
+  hidden [void] EnsureColumn([int] $ColumnIndex) {
     # If the index is out of bound, create new empty columns
     while ($ColumnIndex -ge $this.Columns.Count) {
       $this.Columns += [TreeNodeColumn] @{
         Text = ''
         TextLength = 0
         Alignment = [ColumnAlignment]::Left
+        ChildrenAlignment = [ColumnAlignment]::Left
       }
+    }
+  }
+
+  # Set column alignment for a given column
+  [void] SetColumnAlignment([int] $ColumnIndex, [ColumnAlignment] $Alignment) {
+    # Ignore negative index
+    if ($ColumnIndex -lt 0) {
+      return
     }
 
     # Set the alignment
+    $this.EnsureColumn($ColumnIndex)
     $this.Columns[$ColumnIndex].Alignment = $Alignment
+  }
+
+  # Set children column alignment for a given column (i.e. this is the alignment that is inherited for children)
+  [void] SetChildrenColumnAlignment([int] $ColumnIndex, [ColumnAlignment] $Alignment) {
+    # Ignore negative index
+    if ($ColumnIndex -lt 0) {
+      return
+    }
+
+    # Set the alignment
+    $this.EnsureColumn($ColumnIndex)
+    $this.Columns[$ColumnIndex].ChildrenAlignment = $Alignment
   }
 
   # Recursively format the label of every column-based node in the tree

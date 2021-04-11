@@ -75,15 +75,15 @@ InModuleScope Hospitable {
 
     It 'Inherits parent alignments' {
       $node = (New-Tree).AddChild(@('test'))
-      $node.SetColumnAlignment(0, 'Right')
+      $node.SetChildrenColumnAlignment(0, 'Right')
       $child = $node.AddChild('child')
       $child.Columns[0].Alignment | Should -Be 'Right'
     }
 
     It 'Inherits parent alignments even with ghost columns' {
       $node = New-Tree
-      $node.SetColumnAlignment(1, 'Centered')
-      $node.SetColumnAlignment(3, 'Right')
+      $node.SetChildrenColumnAlignment(1, 'Centered')
+      $node.SetChildrenColumnAlignment(3, 'Right')
 
       $child1 = $node.AddChild('col1')
       $child1.Columns.Count | Should -Be 1
@@ -105,7 +105,7 @@ InModuleScope Hospitable {
 
     It 'Inherits alignment group' {
       $node = New-Tree
-      $node.AlignmentGroup = 1
+      $node.ChildrenAlignmentGroup = 1
       $node.AddChild('test').AlignmentGroup | Should -Be 1
     }
   }
