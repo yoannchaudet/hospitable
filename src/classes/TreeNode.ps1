@@ -3,7 +3,6 @@
 ###
 
 enum ColumnAlignment {
-  Default
   Left
   Right
   Centered
@@ -57,7 +56,7 @@ class TreeNode {
       [TreeNodeColumn] @{
         Text = $trimmedText
         TextLength = Get-FormattedStringLength $trimmedText
-        Alignment = [ColumnAlignment]::Default
+        Alignment = [ColumnAlignment]::Left
       }
     })
     $this.Label = ''
@@ -108,7 +107,7 @@ class TreeNode {
       $this.Columns += [TreeNodeColumn] @{
         Text = ''
         TextLength = 0
-        Alignment = [ColumnAlignment]::Default
+        Alignment = [ColumnAlignment]::Left
       }
     }
 
@@ -128,7 +127,7 @@ class TreeNode {
         # Pad the column
         $invisibleCharacters = $column.Text.Length - $column.TextLength
         switch ($column.Alignment) {
-          { $_ -in 'Default', 'Left' } {
+          'Left' {
             $column.Text.PadRight($column.ColumnLength + $invisibleCharacters, ' ')
           }
           'Right' {

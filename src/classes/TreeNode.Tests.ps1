@@ -24,10 +24,10 @@ InModuleScope Hospitable {
       $node.Columns.Count | Should -Be 2
       $node.Columns[0].Text | Should -Be 'col1'
       $node.Columns[0].TextLength | Should -Be 4
-      $node.Columns[0].Alignment | Should -Be 'Default'
+      $node.Columns[0].Alignment | Should -Be 'Left'
       $node.Columns[1].Text | Should -Be ('col2' | Get-Bold)
       $node.Columns[1].TextLength | Should -Be (Get-FormattedStringLength ('col2' | Get-Bold))
-      $node.Columns[1].Alignment | Should -Be 'Default'
+      $node.Columns[1].Alignment | Should -Be 'Left'
       $node.Children.Count | Should -Be 0
     }
 
@@ -56,7 +56,7 @@ InModuleScope Hospitable {
       $child.Columns.Count | Should -Be 1
       $child.Columns[0].Text | Should -Be ''
       $child.Columns[0].TextLength | Should -Be 0
-      $child.Columns[0].Alignment | Should -Be 'Default'
+      $child.Columns[0].Alignment | Should -Be 'Left'
     }
 
     It 'Add children (n-column)' {
@@ -87,19 +87,19 @@ InModuleScope Hospitable {
 
       $child1 = $node.AddChild('col1')
       $child1.Columns.Count | Should -Be 1
-      $child1.Columns[0].Alignment | Should -Be 'Default' # No inheritance
+      $child1.Columns[0].Alignment | Should -Be 'Left' # No inheritance
 
       $child2 = $node.AddChild(@('col1', 'col2', 'col3'))
       $child2.Columns.Count | Should -Be 3
-      $child2.Columns[0].Alignment | Should -Be 'Default'
+      $child2.Columns[0].Alignment | Should -Be 'Left'
       $child2.Columns[1].Alignment | Should -Be 'Centered'
-      $child2.Columns[2].Alignment | Should -Be 'Default'
+      $child2.Columns[2].Alignment | Should -Be 'Left'
 
       $child3 = $node.AddChild(@('col1', 'col2', 'col3', 'col4'))
       $child3.Columns.Count | Should -Be 4
-      $child3.Columns[0].Alignment | Should -Be 'Default'
+      $child3.Columns[0].Alignment | Should -Be 'Left'
       $child3.Columns[1].Alignment | Should -Be 'Centered'
-      $child3.Columns[2].Alignment | Should -Be 'Default'
+      $child3.Columns[2].Alignment | Should -Be 'Left'
       $child3.Columns[3].Alignment | Should -Be 'Right'
     }
 
@@ -113,7 +113,7 @@ InModuleScope Hospitable {
   Describe 'TreeNode.SetColumnAlignment' {
     It 'Sets alignment on existing columns' {
       $node = (New-Tree).AddChild(@('col1', 'col2'))
-      @('Default', 'Left', 'Right', 'Centered') | ForEach-Object {
+      @('Left', 'Right', 'Centered') | ForEach-Object {
         $node.SetColumnAlignment(1, $_)
         $node.Columns[1].Alignment | Should -Be $_
       }
@@ -127,9 +127,9 @@ InModuleScope Hospitable {
 
     It 'Ignore negative indices' {
       $node = New-Tree
-      $node.SetColumnAlignment(-1, 'Default')
+      $node.SetColumnAlignment(-1, 'Left')
       $node.Columns.Count | Should -Be 0
-      $node.SetColumnAlignment(-2, 'Default')
+      $node.SetColumnAlignment(-2, 'Left')
       $node.Columns.Count | Should -Be 0
     }
 
@@ -140,7 +140,7 @@ InModuleScope Hospitable {
       $node.Columns.Count | Should -Be 2
       $node.Columns[0].Text | Should -Be ''
       $node.Columns[0].TextLength | Should -Be 0
-      $node.Columns[0].Alignment | Should -Be 'Default'
+      $node.Columns[0].Alignment | Should -Be 'Left'
       $node.Columns[1].Text | Should -Be ''
       $node.Columns[1].TextLength | Should -Be 0
       $node.Columns[1].Alignment | Should -Be 'Right'
