@@ -116,35 +116,6 @@ class TreeNode {
     $this.Columns[$ColumnIndex].Alignment = $Alignment
   }
 
-  # Compute the default columns length for the current node and recursively through
-  # the tree
-  [void] ComputeDefaultColumnsLength() {
-    # Stop recursion at leaf nodes
-    if (0 -eq $this.Children.Count) {
-      return
-    }
-
-    # Arrange in a two-dimension array the columns length of the direct children
-    $childrenColumnsLength = @()
-    $this.Children | ForEach-Object {
-      $childrenColumnsLength += ,@($_.Columns | ForEach-Object { $_.TextLength })
-    }
-
-    # Compute the default columns length and assign it to the children
-    $childrenColumnsLength = @(Get-MaxArray $childrenColumnsLength)
-    $this.Children | ForEach-Object {
-      $cols = $_.Columns
-      for ($i = 0; $i -lt [Math]::Min($childrenColumnsLength.Count, $cols.Count); $i++) {
-        $cols[$i].ColumnLength = $childrenColumnsLength[$i]
-      }
-    }
-
-    # Recurse
-    $this.Children | ForEach-Object {
-      $_.ComputeDefaultColumnsLength()
-    }
-  }
-
   # Recursively format the label of every column-based node in the tree
   hidden [void] FormatChildren([int] $SpacesBetweenColumns) {
     # Format the children that have columns

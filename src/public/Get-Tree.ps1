@@ -74,6 +74,21 @@ function Get-Tree {
     }
   }
 
+  # Recursive function for returning all nodes in the tree
+  function Get-TreeChildren {
+    param (
+      [TreeNode] $Node
+    )
+
+    # Output the node (ignore the root with no columns)
+    if ($Node.Columns.Count -gt 0) {
+      $Node
+    }
+
+    # Recurse over  the children
+    $Node.Children | ForEach-Object { Get-TreeChildren $_ }
+  }
+
   # Make sure the root is of the correct type
   if ($Root -isnot [TreeNode]) {
     throw 'Root is invalid'
@@ -87,16 +102,26 @@ function Get-Tree {
     throw 'Prefixes are either not all provided or of different lengths'
   }
 
-  # Compute default columns length
-  $Root.ComputeDefaultColumnsLength()
+  #
+  # Handle alignment groups
+  #
 
-  # Handle alignment groups (ignore null values)
-  @($AlignmentGroups) | Where-Object { $_ } | ForEach-Object {
+  # Get the prefix length
+  $prefixLength = $TreeInPrefix.Length
+
+  # Collect tree nodes per alignment groups
+  $nodesPerGroup = @{}
+  Get-TreeChildren $Root | ForEach-Object {
+    if (-Not $nodesPerGroup.ContainsKey($_.AlignmentGroup)) {
+      $nodesPerGroup[$_.AlignmentGroup] = @()
+    }
+    $nodesPerGroup[$_.AlignmentGroup] += $_
+  }
+
+  # Align group of nodes
+  $nodesPerGroup.Values | ForEach-Object {
     # Get the group of nodes to align
-    $group = @($_ | Where-Object { $_ -is [TreeNode] })
-
-    # Get the prefix length
-    $prefixLength = $TreeInPrefix.Length
+    $group = $_
 
     # Arrange in a two-dimension array the columns length of the nodes in the group
     $groupColumnsLength = @()

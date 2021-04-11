@@ -147,39 +147,6 @@ InModuleScope Hospitable {
     }
   }
 
-  Describe 'TreeNode.ComputeDefaultColumnsLength' {
-    It 'Compute default columns length for 1-column trees' {
-      # Create a tree
-      $tree = New-Tree
-      $tree.AddChild('a').AddChild('hello')
-      $tree.AddChild('bb')
-      $tree.ComputeDefaultColumnsLength()
-
-      $tree.Children[0].Columns[0].ColumnLength | Should -Be 2
-      $tree.Children[1].Columns[0].ColumnLength | Should -Be 2
-      $tree.Children[0].Children[0].Columns[0].ColumnLength | Should -Be 5
-    }
-
-    It 'Compute default columns length for n-column trees' {
-      # Create a tree
-      $tree = New-Tree
-      $a = $tree.AddChild('a')
-      $a.AddChild(@('b', 'bb'))
-      $a.AddChild('bbb')
-      $a.AddChild(@('b', 'bb', 'bbbb'))
-      $tree.ComputeDefaultColumnsLength()
-
-      $a.Columns[0].ColumnLength | Should -Be 1
-      $a.Children[0].Columns[0].ColumnLength | Should -Be 3
-      $a.Children[0].Columns[1].ColumnLength | Should -Be 2
-      $a.Children[1].Columns[0].ColumnLength | Should -Be 3
-      $a.Children[2].Columns[0].ColumnLength | Should -Be 3
-      $a.Children[2].Columns[1].ColumnLength | Should -Be 2
-      $a.Children[2].Columns[2].ColumnLength | Should -Be 4
-    }
-  }
-
-
   Describe 'TreeNode.FormatChildren' {
     It 'Recursively format children' {
       $node = New-Tree
