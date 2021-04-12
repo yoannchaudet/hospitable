@@ -75,8 +75,6 @@ class TreeNode {
   ###
 
   # Add a new child to the current node and return it
-  # Note: we could have introduced a version accepting a TreeNode object too but that would
-  # suddenly allow one to build recursive trees. So we are just allowing New-Tree to create roots.
   [TreeNode] AddChild([String[]] $Columns) {
     if ($null -eq $Columns) {
       throw "Columns cannot be null"
@@ -88,10 +86,12 @@ class TreeNode {
     # Inherit the column alignment from the parent
     for ($i = 0; $i -lt [Math]::Min($Columns.Count, $this.Columns.Count); $i++) {
       $child.SetColumnAlignment($i, $this.Columns[$i].ChildrenAlignment)
+      $child.SetChildrenColumnAlignment($i, $this.Columns[$i].ChildrenAlignment)
     }
 
     # Inherit alignment group
     $child.AlignmentGroup = $this.ChildrenAlignmentGroup
+    $child.ChildrenAlignmentGroup = $this.ChildrenAlignmentGroup
 
     # Set depth
     $child.Depth = $this.Depth + 1

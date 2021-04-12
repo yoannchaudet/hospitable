@@ -4,10 +4,6 @@ Import-Module (Join-Path $PSScriptRoot '../Hospitable.psm1')
 
 InModuleScope Hospitable {
   Describe 'Get-Tree' {
-    It 'Throws when an invalid root is passed' {
-      { Get-Tree 'test' } | Should -Throw 'Root is invalid'
-    }
-
     It 'Throws when prefixes are not provided or are of different lengths' {
       $badPrefixes = @(
         @('a', 'b', 'cc'),
@@ -19,7 +15,7 @@ InModuleScope Hospitable {
         @($null, $null, $null)
       )
       $badPrefixes | ForEach-Object {
-        { Get-Tree (New-Tree) `
+        { Get-Tree {} `
             -TreeInPrefix $_[0] `
             -TreeBranchPrefix $_[1] `
             -TreeLeafPrefix $_[2]
@@ -29,31 +25,36 @@ InModuleScope Hospitable {
 
     It 'Formats one-root tree' {
       # Create a tree
-      $tree = New-Tree
-      $root = $tree.AddChild('root')
-      $node1 = $root.AddChild('node1')
-      $node1.AddChild('subnode 1')
-      $node1.AddChild('subnode 2')
-      $root.AddChild('node2' )
+      $tree = {
+        Node 'root' {
+          Node 'node 1' {
+            Node 'subnode 1'
+            Node 'subnode 2'
+          }
+          Node 'node 2'
+        }
+      }
 
       # Verify it gets formatted fine
       $tree = @(Get-Tree $tree) -Join [Environment]::NewLine
       $tree | Should -Be @"
 root
-├─ node1
+├─ node 1
 │  ├─ subnode 1
 │  └─ subnode 2
-└─ node2
+└─ node 2
 "@
     }
 
     It 'Formats n-root tree' {
       # Create a tree
-      $tree = New-Tree
-      $root1 = $tree.AddChild('root 1')
-      $root1.AddChild('subnode 1')
-      $root1.AddChild('subnode 2')
-      $tree.AddChild('root 2')
+      $tree = {
+        Node 'root 1' {
+          Node 'subnode 1'
+          Node 'subnode 2'
+        }
+        Node 'root 2'
+      }
 
       # Verify we can format multiple parts of the tree as roots
       $tree = @(Get-Tree $tree) -Join [Environment]::NewLine
@@ -67,9 +68,10 @@ root 2
 
     It 'Formats trees with columns at the root (+ SpacesBetweenColumns)' {
       # Create a tree
-      $tree = New-Tree
-      $tree.AddChild(@('col1', 'col2'))
-      $tree.AddChild(@('col3', 'col4'))
+      $tree = {
+        Node 'col1', 'col2'
+        Node 'col3', 'col4'
+      }
 
       # Verify it gets formatted fine
       $tree = @(Get-Tree $tree -SpacesBetweenColumns 3) -Join [Environment]::NewLine
@@ -81,30 +83,36 @@ col3   col4
 
     It 'Formats trees with columns' {
       # Create a tree
-      $tree = New-Tree
-      $root = $tree.AddChild('root')
-      $root.AddChild(@('col1', 'col2'))
-      $root.AddChild('another column')
+      $tree = {
+        Node 'root' {
+          Node 'col1', 'col2'
+          Node 'another node'
+        }
+      }
 
       # Verify it gets formatted fine
       $tree = @(Get-Tree $tree) -Join [Environment]::NewLine
       $tree | Should -Be @"
 root
-├─ col1           col2
-└─ another column
+├─ col1         col2
+└─ another node
 "@
     }
 
     It 'Formats trees with columns and alignment' {
       # Create a tree
-      $tree = New-Tree
-      $root = $tree.AddChild('root')
-      $root.SetChildrenColumnAlignment(0, 'Right')
-      $root.SetChildrenColumnAlignment(1, 'Centered')
-      $root.AddChild(@('col1', 'col2', 'col3'))
-      $root.AddChild('some text')
-      $lastNode = $root.AddChild(@('1', '2', '3'))
-      $lastNode.SetColumnAlignment(0, 'Left') # test overwride
+      $tree = {
+        Node 'root' {
+          ChildrenColumnAlignment 0 'Right'
+          ChildrenColumnAlignment 1 'Centered'
+
+          Node 'col1', 'col2', 'col3'
+          Node 'some text'
+          Node 1, 2, 3 {
+            ColumnAlignment 0 'Left'
+          }
+        }
+      }
 
       # Verify it gets formatted fine
       $tree = @(Get-Tree $tree) -Join [Environment]::NewLine
@@ -116,12 +124,15 @@ root
 "@
     }
 
-    It 'Formats tree with alignment groups' {
+    It 'Formats tree with alignment groups (default)' {
       # Create a tree
-      $tree = New-Tree
-      $n1 = $tree.AddChild(@('a', 'b', 'c'))
-      $n2 = $n1.AddChild(@('aa', 'bb', 'cc'))
-      $n2.AddChild(@('aaa', 'bbb', 'ccc'))
+      $tree = {
+        Node 'a', 'b', 'c' {
+          Node 'aa', 'bb', 'cc' {
+            Node 'aaa', 'bbb', 'ccc'
+          }
+        }
+      }
 
       # Default padding (all nodes in the same group)
       $out = @(Get-Tree $tree) -Join [Environment]::NewLine
@@ -130,9 +141,40 @@ a         b   c
 └─ aa     bb  cc
    └─ aaa bbb ccc
 "@
+    }
 
-      # With multiple alignment groups
-      $n2.AlignmentGroup = 2
+    It 'Formats tree with alignment groups (inherited)' {
+      # Create a tree
+      $tree = {
+        Node 'a', 'b', 'c' {
+          ChildrenAlignmentGroup 1
+          Node 'aa', 'bb', 'cc' {
+            Node 'aaa', 'bbb', 'ccc'
+          }
+        }
+      }
+
+      # Default padding (all nodes in the same group)
+      $out = @(Get-Tree $tree) -Join [Environment]::NewLine
+      $out | Should -Be @"
+a b c
+└─ aa     bb  cc
+   └─ aaa bbb ccc
+"@
+    }
+
+    It 'Formats tree with alignment groups (explicit)' {
+      # Create a tree
+      $tree = {
+        Node 'a', 'b', 'c' {
+          Node 'aa', 'bb', 'cc' {
+            AlignmentGroup 1
+            Node 'aaa', 'bbb', 'ccc'
+          }
+        }
+      }
+
+      # Default padding (all nodes in the same group)
       $out = @(Get-Tree $tree) -Join [Environment]::NewLine
       $out | Should -Be @"
 a         b   c

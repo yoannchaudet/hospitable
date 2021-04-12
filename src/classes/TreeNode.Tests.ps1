@@ -44,12 +44,12 @@ InModuleScope Hospitable {
 
   Describe 'TreeNode.AddChild' {
     It 'Validates columns is not null' {
-      $node = New-Tree
+      $node = [TreeNode]::New(@())
       { $node.AddChild($null) } | Should -Throw
     }
 
     It 'Add children (1-column)' {
-      $node = New-Tree
+      $node = [TreeNode]::New(@())
       $node.Children.Count | Should -Be 0
       $child = $node.AddChild('')
       $node.Children.Count | Should -Be 1
@@ -60,7 +60,7 @@ InModuleScope Hospitable {
     }
 
     It 'Add children (n-column)' {
-      $node = New-Tree
+      $node = [TreeNode]::New(@())
       $node.Children.Count | Should -Be 0
       $child = $node.AddChild(@(1, 2, 3))
       $node.Children.Count | Should -Be 1
@@ -68,20 +68,20 @@ InModuleScope Hospitable {
     }
 
     It 'Increases depth' {
-      $node = (New-Tree).AddChild('1')
+      $node = ([TreeNode]::New(@())).AddChild('1')
       $node.Depth | Should -Be 1
       ($node.AddChild('2')).Depth | Should -Be 2
     }
 
     It 'Inherits parent alignments' {
-      $node = (New-Tree).AddChild(@('test'))
+      $node = ([TreeNode]::New(@())).AddChild(@('test'))
       $node.SetChildrenColumnAlignment(0, 'Right')
       $child = $node.AddChild('child')
       $child.Columns[0].Alignment | Should -Be 'Right'
     }
 
     It 'Inherits parent alignments even with ghost columns' {
-      $node = New-Tree
+      $node = [TreeNode]::New(@())
       $node.SetChildrenColumnAlignment(1, 'Centered')
       $node.SetChildrenColumnAlignment(3, 'Right')
 
@@ -93,6 +93,7 @@ InModuleScope Hospitable {
       $child2.Columns.Count | Should -Be 3
       $child2.Columns[0].Alignment | Should -Be 'Left'
       $child2.Columns[1].Alignment | Should -Be 'Centered'
+      $child2.Columns[1].ChildrenAlignment | Should -Be 'Centered'
       $child2.Columns[2].Alignment | Should -Be 'Left'
 
       $child3 = $node.AddChild(@('col1', 'col2', 'col3', 'col4'))
@@ -104,15 +105,17 @@ InModuleScope Hospitable {
     }
 
     It 'Inherits alignment group' {
-      $node = New-Tree
+      $node = [TreeNode]::New(@())
       $node.ChildrenAlignmentGroup = 1
-      $node.AddChild('test').AlignmentGroup | Should -Be 1
+      $test = $node.AddChild('test')
+      $test.AlignmentGroup | Should -Be 1
+      $test.ChildrenAlignmentGroup | Should -Be 1
     }
   }
 
   Describe 'TreeNode.SetColumnAlignment' {
     It 'Sets alignment on existing columns' {
-      $node = (New-Tree).AddChild(@('col1', 'col2'))
+      $node = ([TreeNode]::New(@())).AddChild(@('col1', 'col2'))
       @('Left', 'Right', 'Centered') | ForEach-Object {
         $node.SetColumnAlignment(1, $_)
         $node.Columns[1].Alignment | Should -Be $_
@@ -120,13 +123,13 @@ InModuleScope Hospitable {
     }
 
     It 'Validates the alignment type' {
-      $node = New-Tree
+      $node = [TreeNode]::New(@())
       { $node.SetColumnAlignment(0, $null) } | Should -Throw
       { $node.SetColumnAlignment(0, 'BadAlignment') } | Should -Throw
     }
 
     It 'Ignore negative indices' {
-      $node = New-Tree
+      $node = [TreeNode]::New(@())
       $node.SetColumnAlignment(-1, 'Left')
       $node.Columns.Count | Should -Be 0
       $node.SetColumnAlignment(-2, 'Left')
@@ -134,7 +137,7 @@ InModuleScope Hospitable {
     }
 
     It 'Adds empty columns when needed' {
-      $node = New-Tree
+      $node = [TreeNode]::New(@())
       $node.Columns.Count | Should -Be 0
       $node.SetColumnAlignment(1, 'Right')
       $node.Columns.Count | Should -Be 2
@@ -149,7 +152,7 @@ InModuleScope Hospitable {
 
   Describe 'TreeNode.FormatChildren' {
     It 'Recursively format children' {
-      $node = New-Tree
+      $node = [TreeNode]::New(@())
       $a = $node.AddChild('a')
       $b = $a.AddChild('b ')
       $c = $b.AddChild(@('c1', 'c2', 'c3'))
@@ -202,7 +205,7 @@ InModuleScope Hospitable {
     }
 
     It 'Formats children that are using text formatting' {
-      $node = New-Tree
+      $node = [TreeNode]::New(@())
       $a = $node.AddChild((Get-Bold "a"))
 
       $a.Columns[0].ColumnLength = 3

@@ -3,8 +3,8 @@ function Get-Tree {
   .SYNOPSIS
   Format a tree.
 
-  .PARAMETER Root
-  The tree root to format.
+  .PARAMETER TreeDSL
+  The domain specific language for building the tree.
 
   .PARAMETER SpacesBetweenColumns
   The number of spaces to use to seperate columns in a node.
@@ -14,7 +14,7 @@ function Get-Tree {
 
   param (
     [Parameter(Mandatory)]
-    [object] $Root,
+    [scriptblock] $TreeDSL,
     [string] $TreeInPrefix = (Get-SettingValue 'TREE_IN_PREFIX' '│  '),
     [string] $TreeBranchPrefix = (Get-SettingValue 'TREE_BRANCH_PREFIX' '├─ '),
     [string] $TreeLeafPrefix = (Get-SettingValue 'TREE_BRANCH_PREFIX' '└─ '),
@@ -85,11 +85,6 @@ function Get-Tree {
     $Node.Children | ForEach-Object { Get-TreeChildren $_ }
   }
 
-  # Make sure the root is of the correct type
-  if ($Root -isnot [TreeNode]) {
-    throw 'Root is invalid'
-  }
-
   # Validate the prefixes are all of the same length
   $prefixesSameLength = $TreeInPrefix -and $TreeBranchPrefix -and $TreeLeafPrefix
   $prefixesSameLength = $prefixesSameLength -and $TreeInPrefix.Length -eq $TreeBranchPrefix.Length
@@ -97,6 +92,74 @@ function Get-Tree {
   if (-not $prefixesSameLength) {
     throw 'Prefixes are either not all provided or of different lengths'
   }
+
+  # Create a tree root
+  $root = [TreeNode]::New(@())
+
+  # Context of the tree DSL
+  $invokeContext = @{
+    # Build a new node
+    Node = {
+      param (
+        [Parameter(Mandatory)]
+        [string[]] $Columns,
+        [scriptblock] $NodeDSL
+      )
+
+      # Add the child to the current node
+      $currentNode = $Node.AddChild($Columns)
+
+      # If a DSL scriptblock was passed, invoke it with the new node as the context
+      if ($NodeDSL) {
+        $NodeDSL.InvokeWithContext($invokeContext, @(New-Variable 'Node' $currentNode))
+      }
+    }
+
+    # Set alignment group
+    AlignmentGroup = {
+      param (
+        [Parameter(Mandatory)]
+        [int] $AlignmentGroup
+      )
+      $Node.AlignmentGroup = $AlignmentGroup
+    }
+
+    # Set children alignment group
+    ChildrenAlignmentGroup = {
+      param (
+        [Parameter(Mandatory)]
+        [int] $AlignmentGroup
+      )
+      $Node.ChildrenAlignmentGroup = $AlignmentGroup
+    }
+
+    # Set column alignment
+    ColumnAlignment = {
+      param (
+        [Parameter(Mandatory)]
+        [int] $ColumnIndex,
+        [Parameter(Mandatory)]
+        [ValidateSet('Left', 'Right', 'Centered')]
+        [string] $ColumnAlignment
+      )
+      $Node.SetColumnAlignment($ColumnIndex, $ColumnAlignment)
+    }
+
+    # Set children column alignment
+    ChildrenColumnAlignment = {
+      param (
+        [Parameter(Mandatory)]
+        [int] $ColumnIndex,
+        [Parameter(Mandatory)]
+        [ValidateSet('Left', 'Right', 'Centered')]
+        [string] $ColumnAlignment
+      )
+      $Node.SetChildrenColumnAlignment($ColumnIndex, $ColumnAlignment)
+    }
+  }
+
+  # Invoke the DSL scriptblock with the root as the context
+  $TreeDSL.InvokeWithContext($invokeContext, @(New-Variable 'Node' $root))
 
   #
   # Handle alignment groups
@@ -107,7 +170,7 @@ function Get-Tree {
 
   # Collect tree nodes per alignment groups
   $nodesPerGroup = @{}
-  Get-TreeChildren $Root | ForEach-Object {
+  Get-TreeChildren $root | ForEach-Object {
     if (-Not $nodesPerGroup.ContainsKey($_.AlignmentGroup)) {
       $nodesPerGroup[$_.AlignmentGroup] = @()
     }
@@ -149,6 +212,6 @@ function Get-Tree {
   }
 
   # Format the tree
-  $Root.FormatChildren($SpacesBetweenColumns)
-  Format-TreeChildren -Children $Root.Children -Indent '' -Root $true
+  $root.FormatChildren($SpacesBetweenColumns)
+  Format-TreeChildren -Children $root.Children -Indent '' -Root $true
 }

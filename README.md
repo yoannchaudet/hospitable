@@ -90,75 +90,114 @@ Get-Lists ('item 1' | Get-Underline), ('item 2' | Get-Underline)
 Format a tree.
 
 ```powershell
-#
-# Build a tree
-#
+Get-Tree {
+  Node 'Fruits' {
+    Node '🥝 Kiwi'
+    Node '🥭 Mango'
+    Node '🍌 Banana'
+  }
 
-# Note the Out-Null not to pollute the output since
-# AddChild returns the child tree node
-$tree = New-Tree
-$fruits = $tree.AddChild('Fruits')
-'🥝 Kiwi', '🥭 Mango', '🍌 Banana' | ForEach-Object {
-  $fruits.AddChild($_)
-} | Out-Null
-$vegetables = $tree.AddChild('Vegetables')
-'🥕 Carrot', '🥔 Potato' | ForEach-Object {
-  $vegetables.AddChild($_)
-} | Out-Null
-
-# And render it
-Get-Tree $tree
+  Node 'Vegetables' {
+    Node '🥕 Carrot'
+    Node '🥔 Potato'
+  }
+}
 ```
 
 ![Get-Tree (simple)](./images/get-tree1.png)
 
-More complex scenarios are also supported:
+A tree is specified using a simple [domain-specific language (DSL)][dsl] and it supports the following extra features:
 
-1. A node may have multiple columns (i.e. space-separated strings)
+1. A node may have multiple columns (that are displayed as space-separated strings)
+2. Columns can be aligned (left, right and centered)
+3. Nodes can have their column aligned together into "alignment groups", by default all nodes are part of the `0` alignment group
 
-2. Columns can be aligned (left, right, centered),
-  the alignment is inherited from parent to children and can be overridden
-
-3. Columns are padded to the longest column of nodes under a same parent,
-  this behavior can be overridden with groups
+Here are few examples showcasing these features.
 
 ```powershell
-#
-# Build a tree
-#
+Get-Tree {
+  Node 'Stock' {
+    # Align the first column (0-indexed) of all children (recursively) to the right
+    ChildrenColumnAlignment 0 'Right'
+    Node (Get-Bold 'ITOT'), 'iShares Core S&P Total US Stock Market ETF', (Get-Negative '$89.93')
+    Node (Get-Bold 'IXUS'), 'iShares Core MSCI Total International Stock ETF', (Get-Negative '$69.50')
+  }
 
-$tree = New-Tree '2021-03-25'
-# Set the third column (0-indexed) of all nodes to be right aligned
-$tree.SetColumnAlignment(2, 'Right')
-$stock = $tree.AddChild('Stock')
-# Add nodes using 3 columns and text formatting
-$itot = $stock.AddChild(@((Get-Bold 'ITOT'), 'iShares Core S&P Total US Stock Market ETF', (Get-Negative '$89.93')))
-$ixus = $stock.AddChild(@((Get-Bold 'IXUS'), 'iShares Core MSCI Total International Stock ETF', (Get-Negative '$69.50')))
-$crypto = $tree.AddChild('Crypto')
-$btc = $crypto.AddChild('Bitcoin')
-$gbtc = $btc.AddChild(@((Get-Bold 'GBTC'), 'Grayscale Bitcoin Trust (Btc)', (Get-Negative '$44.54')))
-# Replace the default alignment (left) for the first column (0-indexed) of the three three-column nodes
-$itot, $ixus, $gbtc | ForEach-Object {
-  $_.SetColumnAlignment(0, 'Right')
+  Node 'Crypto' {
+    Node 'Bitcoin' {
+      Node (Get-Bold 'GBTC'), 'Grayscale Bitcoin Trust (Btc)', (Get-Negative '$44.54') {
+        # Specifically align the first column to the left
+        ColumnAlignment 0 'Right'
+      }
+    }
+  }
 }
-
-# Render the tree
-Get-Tree $tree
 ```
 
-![Get-Tree (complex with default padding)](./images/get-tree2.png)
-
-Notice the `ITOT` and `IXUS` nodes have their columns padded together (so the $ amounts on the right are aligned properly). This is a demonstration of the third scenario described above.
-
-In order to pad together the leave-nodes they can be put together in an alignment group:
+![Get-Tree (column alignment)](./images/get-tree2.png)
 
 ```powershell
-# Render the tree with one alignment group
-# Note the syntax here which is required to pass a two-dimension array containing a single array (group)
-Get-Tree $tree -AlignmentGroups @(,@($itot, $ixus, $gbtc))
+Get-Tree {
+  Node 'Show', 'Year'
+  Node 'Episode', 'Title', 'Rating' {
+    ColumnAlignment 0 'Right'
+
+    # Specifically group this node in the alignment group 1 (instead of the default which is 0)
+    AlignmentGroup 1
+  }
+
+  Node ("The Queen's Gambit" | Get-Bold), '2020' {
+    Node 'Season 1' {
+      # Group all children nodes in the alignment group 1
+      ChildrenAlignmentGroup 1
+
+      Node 'Ep1', 'Openings', '8.5/10'
+      Node 'Ep2', 'Exchanges', '8.8/10'
+      Node 'Ep3', 'Doubled Pawns', '8.5/10'
+      Node 'Ep4', 'Middle Game', '8.5/10'
+      Node 'Ep5', 'Fork', '8.3/10'
+      Node 'Ep6', 'Adjournment', '8.5/10'
+      Node 'Ep7', 'End Game', '9.3/10'
+    }
+  }
+
+  Node ('Pushing Daisies' | Get-Bold), '2007–2009' {
+    Node 'Season 1' {
+      ChildrenAlignmentGroup 1
+
+      Node 'Ep1', 'Pie-lette', '8.8/10'
+      Node 'Ep2', 'Dummy', '8.2/10'
+      Node 'Ep3', 'The Fun in Funeral', '8.3/10'
+      Node 'Ep4', 'Pigeon', '8.4/10'
+      Node 'Ep5', 'Girth', '8.3/10'
+      Node 'Ep6', 'Bitches', '8.2/10'
+      Node 'Ep7', 'Smell of Success', '8.3/10'
+      Node 'Ep8', 'Bitter Sweets', '8.6/10'
+      Node 'Ep9', 'Corpsicle', '8.6/10'
+    }
+
+    Node 'Season 2' {
+      ChildrenAlignmentGroup 1
+
+      Node 'Ep1', 'Bzzzzzzzzz!', '8.5/10'
+      Node 'Ep2', 'Circus', '8.4/10'
+      Node 'Ep3', 'Bad Habits', '8.4/10'
+      Node 'Ep4', 'Frescorts', '8.5/10'
+      Node 'Ep5', 'Dim Sum Lose Some', '8.6/10'
+      Node 'Ep6', "Oh Oh Oh... It's Magic", '8.7/10'
+      Node 'Ep7', 'Robbing Hood', '8.3/10'
+      Node 'Ep8', 'Comfort Food', '9.0/10'
+      Node 'Ep9', 'The Legend of Merle McQuoddy', '8.4/10'
+      Node 'Ep10', 'The Norwegians', '8.8/10'
+      Node 'Ep11', 'Window Dressed to Kill', '8.8/10'
+      Node 'Ep12', 'Water & Power', '8.6/10'
+      Node 'Ep13', 'Kerplunk', '8.9/10'
+    }
+  }
+}
 ```
 
-![Get-Tree (complex with alignment groups)](./images/get-tree3.png)
+![Get-Tree (alignment group)](./images/get-tree3.png)
 
 ## License
 
@@ -175,3 +214,4 @@ Distributed under the MIT License. See [`LICENSE`](./LICENSE) for more informati
 [pester]: https://pester.dev/
 [powershell]: https://github.com/PowerShell/PowerShell
 [vt-100]: https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences
+[dsl]: https://en.wikipedia.org/wiki/Domain-specific_language
