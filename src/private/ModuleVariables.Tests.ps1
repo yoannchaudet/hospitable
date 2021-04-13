@@ -4,6 +4,10 @@ Import-Module (Join-Path $PSScriptRoot '../Hospitable.psm1')
 
 InModuleScope Hospitable {
   Describe 'Get-SettingValue' {
+    BeforeEach {
+      Remove-Variable -Name 'HOSPITABLE_TEST' -Scope 'global' -Force -ErrorAction 'SilentlyContinue'
+    }
+
     It 'Returns default value when no override is defined' {
       Get-SettingValue -Setting 'TEST' -DefaultValue 'default value' | Should -Be 'default value'
     }
