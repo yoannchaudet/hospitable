@@ -15,11 +15,7 @@ InModuleScope Hospitable {
         @($null, $null, $null)
       )
       $badPrefixes | ForEach-Object {
-        { Get-Tree {} `
-            -TreeInPrefix $_[0] `
-            -TreeBranchPrefix $_[1] `
-            -TreeLeafPrefix $_[2]
-        } | Should -Throw 'Prefixes are either not all provided or of different lengths'
+        { Get-Tree {} -Prefixes @($_) } | Should -Throw
       }
     }
 

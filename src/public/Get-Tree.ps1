@@ -6,19 +6,24 @@ function Get-Tree {
   .PARAMETER TreeDSL
   The domain specific language for building the tree.
 
-  .PARAMETER SpacesBetweenColumns
-  The number of spaces to use to seperate columns in a node.
-  #>
+  .PARAMETER Prefixes
+  A 3-element array containing the prefixes to use for formatting the tree.
 
-  # TODO: Document the prefixes
+  The prefixes must all have the same length.
+
+  .PARAMETER SpacesBetweenColumns
+  The number of spaces to use to seperate columns in a node. Default to 1.
+  #>
 
   param (
     [Parameter(Mandatory)]
     [scriptblock] $TreeDSL,
-    [string] $TreeInPrefix = (Get-SettingValue 'TREE_IN_PREFIX' '│  '),
-    [string] $TreeBranchPrefix = (Get-SettingValue 'TREE_BRANCH_PREFIX' '├─ '),
-    [string] $TreeLeafPrefix = (Get-SettingValue 'TREE_BRANCH_PREFIX' '└─ '),
-    [ValidateRange(0, 42)]
+    [string[]] $Prefixes = @(
+      (Get-SettingValue 'TREE_IN_PREFIX' '│  '),
+      (Get-SettingValue 'TREE_BRANCH_PREFIX' '├─ '),
+      (Get-SettingValue 'TREE_BRANCH_PREFIX' '└─ ')
+    ),
+    [ValidateRange(0, 20)]
     [int] $SpacesBetweenColumns = 1
   )
 
@@ -35,16 +40,16 @@ function Get-Tree {
     $outputPrefix = ""
     if (!$Root) {
       $outputPrefix += $Indent
-      $outputPrefix += ($Last ? $TreeLeafPrefix : $TreeBranchPrefix)
+      $outputPrefix += ($Last ? $Prefixes[2] : $Prefixes[1])
     }
     "${outputPrefix}$($Node.Label)"
 
     # Recursively increment the indentation
     if (!$Root) {
       if ($Last) {
-        $Indent += (" " * $TreeInPrefix.Length)
+        $Indent += (" " * $Prefixes[0].Length)
       } else {
-        $Indent += $TreeInPrefix
+        $Indent += $Prefixes[0]
       }
     }
 
@@ -83,14 +88,6 @@ function Get-Tree {
 
     # Recurse over  the children
     $Node.Children | ForEach-Object { Get-TreeChildren $_ }
-  }
-
-  # Validate the prefixes are all of the same length
-  $prefixesSameLength = $TreeInPrefix -and $TreeBranchPrefix -and $TreeLeafPrefix
-  $prefixesSameLength = $prefixesSameLength -and $TreeInPrefix.Length -eq $TreeBranchPrefix.Length
-  $prefixesSameLength = $prefixesSameLength -and $TreeBranchPrefix.Length -eq $TreeLeafPrefix.Length
-  if (-not $prefixesSameLength) {
-    throw 'Prefixes are either not all provided or of different lengths'
   }
 
   # Create a tree root
@@ -158,15 +155,15 @@ function Get-Tree {
     }
   }
 
+  # Validate the prefixes are all of the same length
+  $prefixLength = Confirm-ValidPrefixes $Prefixes -PrefixesCount 3 -SameLength
+
   # Invoke the DSL scriptblock with the root as the context
   $TreeDSL.InvokeWithContext($invokeContext, @(New-Variable 'Node' $root))
 
   #
   # Handle alignment groups
   #
-
-  # Get the prefix length
-  $prefixLength = $TreeInPrefix.Length
 
   # Collect tree nodes per alignment groups
   $nodesPerGroup = @{}
@@ -205,7 +202,7 @@ function Get-Tree {
       }
     }
 
-    # Fix the first column length to adjust for the ßprefix
+    # Correct the first column length to adjust for the prefix
     $group | ForEach-Object {
       $_.Columns[0].ColumnLength -= ($_.Depth - 1) * $prefixLength
     }

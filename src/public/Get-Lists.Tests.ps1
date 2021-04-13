@@ -45,5 +45,15 @@ InModuleScope Hospitable {
  ─ e
 "@
     }
+
+    It 'Uses custom prefixes' {
+      (Get-Lists @(@('a', 'b', 'c'), 'd', @('e')) -Prefixes @('1', '2', '3', '*')) -Join [Environment]::NewLine | Should -Be @"
+1a
+2b
+3c
+*d
+*e
+"@
+    }
   }
 }

@@ -23,4 +23,21 @@ InModuleScope Hospitable {
       $l[0] | Should -Be 2
     }
   }
+
+  Describe 'Confirm-ValidPrefixes' {
+    It 'Validates prefixes count' {
+      { Confirm-ValidPrefixes -Prefixes @() -PrefixesCount 1 } | Should -Throw "Invalid number of prefixes provided (expected = 1)"
+      { Confirm-ValidPrefixes -Prefixes @($null) -PrefixesCount 1 } | Should -Throw "Invalid number of prefixes provided (expected = 1)"
+      { Confirm-ValidPrefixes -Prefixes @($null, 'test') -PrefixesCount 1 } | Should -Throw "Invalid number of prefixes provided (expected = 1)"
+      { Confirm-ValidPrefixes -Prefixes @($null, 'test') -PrefixesCount 2 } | Should -Throw "Invalid number of prefixes provided (expected = 2)"
+      { Confirm-ValidPrefixes -Prefixes @('test', 'test') -PrefixesCount 1 } | Should -Throw "Invalid number of prefixes provided (expected = 1)"
+      { Confirm-ValidPrefixes -Prefixes @('test', 'test') -PrefixesCount 2 } | Should -Not -Throw "Invalid number of prefixes provided (expected = 1)"
+    }
+
+    It 'Validates prefixes are of the same length' {
+      Confirm-ValidPrefixes -Prefixes @('a') -PrefixesCount 1 -SameLength | Should -Be 1
+      Confirm-ValidPrefixes -Prefixes @('aa', 'bb', 'cc') -PrefixesCount 3 -SameLength | Should -Be 2
+      { Confirm-ValidPrefixes -Prefixes @('aa', 'b', 'cc') -PrefixesCount 3 -SameLength } | Should -Throw "Prefixes must all have the same length"
+    }
+  }
 }
