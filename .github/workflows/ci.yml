@@ -26,7 +26,6 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage.xml
           flags: unittests
-          env_vars: OS
+          env_vars: RUNNER_OS
           name: codecov-umbrella
           fail_ci_if_error: true
-          verbose: true
