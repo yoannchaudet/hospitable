@@ -1,5 +1,9 @@
 name: CI
-on: [push]
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
 jobs:
   test:
     name: Run tests
@@ -9,10 +13,24 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macOS-latest]
     steps:
-    - uses: actions/checkout@v1
-    - name: Install build dependencies
-      shell: pwsh
-      run: ./install-build-dependencies.ps1
-    - name: Test
-      shell: pwsh
-      run: ./build.ps1 Test
+      - uses: actions/checkout@v1
+      - name: Install build dependencies
+        shell: pwsh
+        run: ./install-build-dependencies.ps1
+      - name: Test
+        shell: pwsh
+        run: ./build.ps1 Test
+      - name: Archive code coverage results
+        uses: actions/upload-artifact@v2
+        with:
+          name: code-coverage-report-${{ matrix.os }}
+          path: ./coverage.xml
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.xml
+          flags: unittests
+          env_vars: RUNNER_OS
+          name: codecov-umbrella
+          fail_ci_if_error: true

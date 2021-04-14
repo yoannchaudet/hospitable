@@ -1,5 +1,5 @@
 #!/usr/bin/env pwsh
-#Requires -Version 7.0 -Modules @{ ModuleName='Pester'; ModuleVersion='5.1.1' }
+#Requires -Version 7.0 -Modules @{ ModuleName='Pester'; ModuleVersion='5.2' }
 
 <#
 .SYNOPSIS
@@ -52,7 +52,7 @@ switch ($Task) {
 `$configuration = [PSCustomObject] [System.Management.Automation.PSSerializer]::Deserialize([System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String(`'$encodedConfiguration`')));
 Invoke-Pester -Configuration `$configuration
 "@
-    & pwsh -NoProfile -NoLogo -NonInteractive -Command "$command"
+    & pwsh -NoProfile -NoLogo -NonInteractive -WorkingDirectory $PSScriptRoot -Command "$command"
   }
 
   'Import' {
