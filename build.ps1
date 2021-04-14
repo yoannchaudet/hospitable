@@ -1,5 +1,5 @@
 #!/usr/bin/env pwsh
-#Requires -Version 7.0 -Modules @{ ModuleName='Pester'; ModuleVersion='5.1.1' }
+#Requires -Version 7.0 -Modules @{ ModuleName='Pester'; ModuleVersion='5.2' }
 
 <#
 .SYNOPSIS
@@ -29,8 +29,6 @@ $ErrorActionPreference = 'Stop'
 # Switch task
 switch ($Task) {
   'Test' {
-    Write-Host "Set path to be = $(Join-Path $PSScriptRoot 'src')"
-
     # Build Pester configuration
     $pesterConfiguration = @{
       Run = @{
@@ -38,10 +36,9 @@ switch ($Task) {
       }
       CodeCoverage = @{
         Enabled = $true
-        Path = (Join-Path $PSScriptRoot 'src' '*.ps1')
       }
       Output = @{
-        Verbosity = 'Diagnostic'
+        Verbosity = 'Detailed'
       }
     }
 
