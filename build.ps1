@@ -1,5 +1,5 @@
 #!/usr/bin/env pwsh
-#Requires -Version 7.0 -Modules @{ ModuleName='Pester'; ModuleVersion='5.1.1' }
+#Requires -Version 7.0 -Modules @{ ModuleName='Pester'; ModuleVersion='5.2.0-alpha3' }
 
 <#
 .SYNOPSIS
