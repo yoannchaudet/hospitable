@@ -6,6 +6,8 @@
   </a>
 </p>
 
+[![codecov](https://codecov.io/gh/yoannchaudet/hospitable/branch/main/graph/badge.svg?token=oaUoNkiZgp)](https://codecov.io/gh/yoannchaudet/hospitable)
+
 ## Table of Contents
 
 - [Table of Contents](#table-of-contents)
