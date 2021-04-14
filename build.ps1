@@ -29,6 +29,8 @@ $ErrorActionPreference = 'Stop'
 # Switch task
 switch ($Task) {
   'Test' {
+    Write-Host "Set path to be = $(Join-Path $PSScriptRoot 'src')"
+
     # Build Pester configuration
     $pesterConfiguration = @{
       Run = @{
