@@ -55,7 +55,7 @@ switch ($Task) {
 `$configuration = [PSCustomObject] [System.Management.Automation.PSSerializer]::Deserialize([System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String(`'$encodedConfiguration`')));
 Invoke-Pester -Configuration `$configuration
 "@
-    & pwsh -NoProfile -NoLogo -NonInteractive -Command "$command"
+    & pwsh -NoProfile -NoLogo -NonInteractive -WorkingDirectory $PSScriptRoot -Command "$command"
   }
 
   'Import' {
