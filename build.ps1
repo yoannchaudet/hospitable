@@ -41,7 +41,7 @@ switch ($Task) {
         Path = (Join-Path $PSScriptRoot 'src' '*.ps1')
       }
       Output = @{
-        Verbosity = 'Detailed'
+        Verbosity = 'Diagnostic'
       }
     }
 
