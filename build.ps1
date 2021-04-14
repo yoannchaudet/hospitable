@@ -36,6 +36,7 @@ switch ($Task) {
       }
       CodeCoverage = @{
         Enabled = $true
+        Path = (Join-Path $PSScriptRoot 'src' '*.ps1')
       }
       Output = @{
         Verbosity = 'Detailed'
