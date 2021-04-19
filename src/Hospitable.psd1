@@ -19,7 +19,7 @@ Author = 'Yoann Chaudet'
 Copyright = '(c) Yoann Chaudet. All rights reserved.'
 
 # Description of the functionality provided by this module
-# Description = ''
+Description = 'Hospitable is a set of cmdlets (advanced functions) for "pretty printing" things in a terminal/console.'
 
 # Minimum version of the PowerShell engine required by this module
 PowerShellVersion = '7.0'
@@ -84,16 +84,16 @@ PrivateData = @{
     PSData = @{
 
         # Tags applied to this module. These help with module discovery in online galleries.
-        # Tags = @()
+        Tags = @('terminal', 'console', 'tree', 'list', 'formatting', 'PSEdition_Core', 'Windows', 'Linux', 'MacOS')
 
         # A URL to the license for this module.
-        # LicenseUri = ''
+        LicenseUri = 'https://github.com/yoannchaudet/hospitable/blob/HEAD/LICENSE'
 
         # A URL to the main website for this project.
-        # ProjectUri = ''
+        ProjectUri = 'https://github.com/yoannchaudet/hospitable'
 
         # A URL to an icon representing this module.
-        # IconUri = ''
+        IconUri = 'https://raw.githubusercontent.com/yoannchaudet/hospitable/HEAD/images/hospitable-85x85.png'
 
         # ReleaseNotes of this module
         # ReleaseNotes = ''
