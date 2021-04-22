@@ -4,7 +4,7 @@
     RootModule           = 'Hospitable.psm1'
 
     # Version number of this module.
-    ModuleVersion        = '1.0.0'
+    ModuleVersion        = '1.0.1'
 
     # Supported PSEditions
     CompatiblePSEditions = @('Core')
@@ -100,7 +100,7 @@
             IconUri      = 'https://raw.githubusercontent.com/yoannchaudet/hospitable/HEAD/images/hospitable-85x85.png'
 
             # ReleaseNotes of this module
-            ReleaseNotes = 'https://github.com/yoannchaudet/hospitable/releases/tag/1.0.0'
+            ReleaseNotes = 'https://github.com/yoannchaudet/hospitable/releases/tag/1.0.1'
 
             # Prerelease string of this module
             # Prerelease = ''
