@@ -6,7 +6,7 @@
   </a>
 </p>
 
-[![codecov](https://codecov.io/gh/yoannchaudet/hospitable/branch/main/graph/badge.svg?token=oaUoNkiZgp)](https://codecov.io/gh/yoannchaudet/hospitable)
+![PowerShell Gallery Version](https://img.shields.io/powershellgallery/v/hospitable) [![codecov](https://codecov.io/gh/yoannchaudet/hospitable/branch/main/graph/badge.svg?token=oaUoNkiZgp)](https://codecov.io/gh/yoannchaudet/hospitable)
 
 ## Table of Contents
 
@@ -34,11 +34,17 @@ This project supports PowerShell 7+ and is compatible with Windows 10+, MacOS an
 
 ## Getting Started
 
-To run locally follow these steps:
+To get started, follow these steps:
 
 - Install [PowerShell][powershell]
 
-- Then run the following commands from the root of this repository:
+- In a PowerShell prompt, install the latest version from the PowerShell Gallery with:
+
+   ```powershell
+  Install-Module Hospitable -Scope CurrentUser
+   ```
+
+- Or in any shell, get yourself a local development environment with:
 
    ```sh
    # Install build dependencies
@@ -52,6 +58,8 @@ To run locally follow these steps:
    ```
 
 ## Usage and Examples
+
+The following examples can be run in a PowerShell prompt.
 
 ### Text Formatting
 
