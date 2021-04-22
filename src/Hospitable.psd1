@@ -4,7 +4,7 @@
 # RootModule = ''
 
 # Version number of this module.
-ModuleVersion = '0.0.1'
+ModuleVersion = '1.0.0'
 
 # Supported PSEditions
 CompatiblePSEditions = @('Core')
@@ -58,7 +58,11 @@ PowerShellVersion = '7.0'
 # NestedModules = @()
 
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-FunctionsToExport = @()
+FunctionsToExport = @(
+    'Get-Bold', 'Get-Negative', 'Get-StrikeThrough', 'Get-Underline',
+    'Get-Lists',
+    'Get-Tree'
+)
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
 CmdletsToExport = @()
@@ -96,7 +100,7 @@ PrivateData = @{
         IconUri = 'https://raw.githubusercontent.com/yoannchaudet/hospitable/HEAD/images/hospitable-85x85.png'
 
         # ReleaseNotes of this module
-        # ReleaseNotes = ''
+        ReleaseNotes = 'https://github.com/yoannchaudet/hospitable/releases/tag/1.0.0'
 
         # Prerelease string of this module
         # Prerelease = ''
