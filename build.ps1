@@ -16,8 +16,6 @@ The task to run.
 The name of the module for which the script runs.
 #>
 
-[CmdletBinding(SupportsShouldProcess=$True)]
-
 param (
   [ValidateSet('Test', 'Import', 'Publish')]
   [Parameter(Position = 0)]
@@ -36,6 +34,7 @@ switch ($Task) {
     $pesterConfiguration = @{
       Run = @{
         Path = (Join-Path $PSScriptRoot 'src')
+        Exit = $true
       }
       CodeCoverage = @{
         Enabled = $true
@@ -65,7 +64,7 @@ Invoke-Pester -Configuration `$configuration
 
   'Publish' {
     # Validate a NUGET_API_KEY environment variable was provided
-    if (-Not (Test-Path env:NUGET_API_KEY)) {
+    if (-Not $env:NUGET_API_KEY) {
       throw "`$env:NUGET_API_KEY is undefined (required to publish the module)"
     }
 
@@ -75,16 +74,48 @@ Invoke-Pester -Configuration `$configuration
     Copy-Item `
       -Path (Join-Path $PSScriptRoot 'src' '*') `
       -Destination $releaseModuleFolder `
-      -Exclude '*.Tests.ps1' `
+      -Exclude '*.Tests.ps1', 'TestHeader.Tests.ps1' `
       -Recurse `
       -WhatIf:$false
+
+    #
+    # Test the module in its publish folder
+    #
+
+    # Save current PSModulePath
+    $originalModulePath = $env:PSModulePath
+    try {
+      # Instruct the test header to import Hospitable from the first installed location
+      $env:HOSPITABLE_TEST_RELEASE = $true
+
+      # Update PSModulePath so the published folder is the first location to look at
+      $modulePaths = @()
+      if ($originalModulePath) {
+        $modulePaths = $originalModulePath.Split([IO.Path]::PathSeparator)
+      }
+      $modulePaths = @(Split-Path $releaseModuleFolder -Parent) + $modulePaths
+      $env:PSModulePath = $modulePaths -Join [IO.Path]::PathSeparator
+
+      # Test the module
+      & (Join-Path $PSScriptRoot 'build.ps1') -Task 'Test'
+    } finally {
+      # Restore environment variables
+      $env:HOSPITABLE_TEST_RELEASE = $null
+      if ($originalModulePath) {
+        $env:PSModulePath = $originalModulePath
+      }
+    }
+
+    # Abort the publication if at least one test failed
+    if ($LASTEXITCODE -ne 0) {
+      throw "At least one test failed, aborting publication"
+    }
 
     # Publish the module
     Publish-Module `
       -Path $releaseModuleFolder `
-      -Repository PSGallery `
+      -Repository 'PSGallery' `
       -NuGetApiKey $env:NUGET_API_KEY `
-      -Verbose `
-      -WhatIf:$WhatIfPreference
+      -Verbose
   }
 }

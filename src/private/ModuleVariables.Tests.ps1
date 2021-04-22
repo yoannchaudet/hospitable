@@ -1,6 +1,5 @@
-# Load (or reload) the module
-Remove-Module -Name 'Hospitable' -Force -ErrorAction 'SilentlyContinue'
-Import-Module (Join-Path $PSScriptRoot '../Hospitable.psm1')
+# Import the module
+. (Join-Path $PSScriptRoot '../TestHeader.Tests.ps1')
 
 InModuleScope Hospitable {
   Describe 'Get-SettingValue' {
